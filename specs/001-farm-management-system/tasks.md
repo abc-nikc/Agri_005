@@ -19,7 +19,7 @@
 - [X] T003 [P] Initialize frontend Vue 3 project with TypeScript (Vite, package.json)
 - [X] T004 [P] Configure ESLint and Prettier for backend
 - [X] T005 [P] Configure ESLint and Prettier for frontend
-- [X] T006 Configure Docker Compose for PostgreSQL, InfluxDB, EMQX, Redis
+- [X] T006 Configure Docker Compose for MySQL, InfluxDB, EMQX, Redis
 - [X] T007 [P] Create backend .env.example with all required environment variables
 - [X] T008 [P] Create frontend .env.example with VITE_API_BASE_URL
 
@@ -36,7 +36,7 @@
 ### 2.1 Database & ORM Setup
 
 - [X] T009 [P] Install and configure TypeORM in backend (typeorm, pg driver)
-- [X] T010 [P] Create PostgreSQL database and user (scripts/setup-db.sql)
+- [X] T010 [P] Create MySQL database and user (scripts/setup-db.sql)
 - [X] T011 [P] Configure InfluxDB connection and bucket (src/config/influxdb.ts)
 - [X] T012 Create database migration framework (src/migrations/)
 - [X] T013 [P] Create base entity class with common fields (id, created_at, updated_at)

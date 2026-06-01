@@ -10,7 +10,7 @@
 
 - **OS**: Linux (Ubuntu 20.04+) / macOS 12+ / Windows 10+ (WSL2)
 - **Node.js**: 18.0+ (推荐 20.x LTS)
-- **PostgreSQL**: 15+
+- **MySQL**: 15+
 - **InfluxDB**: 2.7+
 - **MQTT Broker**: EMQX 5.0+ (或 Mosquitto 2.0+)
 - **Redis**: 7.0+ (可选，用于缓存和 Session 管理)
@@ -32,7 +32,7 @@
 git clone https://github.com/your-org/farm-management-system.git
 cd farm-management-system
 
-# 启动依赖服务（PostgreSQL, InfluxDB, EMQX, Redis）
+# 启动依赖服务（MySQL, InfluxDB, EMQX, Redis）
 docker-compose -f docker/docker-compose.yml up -d
 
 # 验证服务状态
@@ -42,7 +42,7 @@ docker ps
 **Expected Output**:
 ```
 CONTAINER ID   IMAGE                    STATUS
-abc123          postgres:15-alpine       Up 30 seconds
+abc123          mysql:8.0       Up 30 seconds
 def456          influxdb:2.7-alpine      Up 30 seconds
 ghi789          emqx/emqx:5.0            Up 30 seconds
 jkl012          redis:7-alpine           Up 30 seconds
@@ -57,7 +57,7 @@ jkl012          redis:7-alpine           Up 30 seconds
 cp backend/.env.example backend/.env
 
 # 编辑 backend/.env，配置以下关键变量：
-# - DATABASE_URL=postgresql://farm_user:password@localhost:5432/farm_management
+# - DATABASE_URL=mysql://farm_user:password@localhost:3306/farm_management
 # - INFLUX_URL=http://localhost:8086
 # - INFLUX_TOKEN=your-influx-token
 # - INFLUX_ORG=your-org
@@ -110,7 +110,7 @@ npm run start
 **Expected Output**:
 ```
 [INFO] Server listening on port 3000
-[INFO] Connected to PostgreSQL database
+[INFO] Connected to MySQL database
 [INFO] Connected to InfluxDB
 [INFO] MQTT client connected to broker
 [INFO] JWT authentication initialized
@@ -230,7 +230,7 @@ farm-management-system/
 │
 ├── docker/                 # Docker 配置
 │   ├── docker-compose.yml # 依赖服务定义
-│   ├── postgres/          # PostgreSQL 初始化脚本
+│   ├── mysql/          # MySQL 初始化脚本
 │   └── influxdb/         # InfluxDB 配置
 │
 ├── scripts/                # 脚本工具
@@ -312,17 +312,17 @@ curl -X POST http://localhost:3000/api/v1/traceability/generate \
 
 ## Troubleshooting
 
-### 问题 1: 后端启动失败，提示"Cannot connect to PostgreSQL"
+### 问题 1: 后端启动失败，提示"Cannot connect to MySQL"
 
 **可能原因**:
-- PostgreSQL 未启动
+- MySQL 未启动
 - `DATABASE_URL` 环境变量配置错误
 - 数据库用户权限不足
 
 **解决方案**:
 ```bash
-# 检查 PostgreSQL 是否运行
-docker ps | grep postgres
+# 检查 MySQL 是否运行
+docker ps | grep mysql
 
 # 手动测试连接
 psql -h localhost -U farm_user -d farm_management

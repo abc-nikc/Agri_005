@@ -273,7 +273,7 @@ sequenceDiagram
     participant Broker as MQTT Broker
     participant Backend as Backend Service
     participant InfluxDB as InfluxDB
-    participant Postgres as PostgreSQL
+    participant MySQL as MySQL
     participant Frontend as Frontend (WebSocket)
 
     Device->>Broker: PUBLISH farm/A01/DEV-001/temperature/data
@@ -281,7 +281,7 @@ sequenceDiagram
     Backend->>Backend: 数据校验（量程、变化率、时序）
     
     alt 数据异常
-        Backend->>Postgres: 写入异常数据隔离表
+        Backend->>MySQL: 写入异常数据隔离表
         Backend->>Broker: PUBLISH farm/alerts/high
         Broker->>Frontend: 推送告警通知
     else 数据正常
@@ -292,7 +292,7 @@ sequenceDiagram
 
     Device->>Broker: PUBLISH farm/A01/DEV-001/status
     Broker->>Backend: 转发消息 (QoS 1)
-    Backend->>Postgres: 更新设备状态
+    Backend->>MySQL: 更新设备状态
 ```
 
 ---
@@ -325,17 +325,17 @@ sequenceDiagram
 sequenceDiagram
     participant User as 用户（前端）
     participant Backend as Backend Service
-    participant Postgres as PostgreSQL (审计日志)
+    participant MySQL as MySQL (审计日志)
     participant Broker as MQTT Broker
     participant Device as IoT Device
 
     User->>Backend: POST /api/v1/devices/:id/command
-    Backend->>Postgres: 记录指令下发（审计日志）
+    Backend->>MySQL: 记录指令下发（审计日志）
     Backend->>Broker: PUBLISH farm/A01/DEV-001/command
     Broker->>Device: 转发指令 (QoS 1)
     Device->>Broker: PUBLISH farm/A01/DEV-001/status
     Broker->>Backend: 转发状态 (QoS 1)
-    Backend->>Postgres: 记录指令执行结果（审计日志）
+    Backend->>MySQL: 记录指令执行结果（审计日志）
     Backend->>User: WebSocket 推送执行结果
 ```
 

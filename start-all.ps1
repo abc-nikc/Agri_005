@@ -3,10 +3,10 @@
 
 Write-Host "=== 农场管家系统 - 启动 ===" -ForegroundColor Green
 
-# 确保 PostgreSQL 运行
-Write-Host "[1/3] 启动 PostgreSQL..." -ForegroundColor Cyan
-net start postgresql-x64-15 2>$null
-Write-Host "PostgreSQL OK" -ForegroundColor Green
+# 确保 MySQL 运行
+Write-Host "[1/3] 启动 MySQL..." -ForegroundColor Cyan
+net start mysql 2>$null
+Write-Host "MySQL OK" -ForegroundColor Green
 
 # 启动后端
 Write-Host "[2/3] 启动后端 (端口 3001)..." -ForegroundColor Cyan

@@ -71,9 +71,9 @@ if (-not (Test-Path $nodeModulesPath)) {
 
 # 检查数据库是否可连接
 Write-Host "检查数据库连接..." -ForegroundColor Yellow
-Write-Host "确保 PostgreSQL 服务正在运行" -ForegroundColor Cyan
+Write-Host "确保 MySQL 服务正在运行" -ForegroundColor Cyan
 Write-Host "如果连接失败，请检查:" -ForegroundColor Cyan
-Write-Host "  1. PostgreSQL 服务是否启动" -ForegroundColor Cyan
+Write-Host "  1. MySQL 服务是否启动" -ForegroundColor Cyan
 Write-Host "  2. .env 文件中的数据库配置是否正确" -ForegroundColor Cyan
 Write-Host "  3. 数据库 farm_management 是否已创建" -ForegroundColor Cyan
 

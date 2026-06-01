@@ -194,7 +194,7 @@ const startServer = async () => {
   try {
     // 初始化数据库连接
     await AppDataSource.initialize();
-    console.log('[INFO] Connected to PostgreSQL database');
+    console.log('[INFO] Connected to MySQL database');
 
     // 自动创建 admin 用户（如果不存在）
     const { Staff } = await import('./models/staff.entity');

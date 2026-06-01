@@ -8,24 +8,25 @@
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库
-  postgres:
-    image: postgres:16-alpine
-    container_name: farm-postgres
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: farm-mysql
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: farm_management
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: farm_management
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - mysql_data:/var/lib/mysql
+      - ./scripts/setup-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - farm-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -97,10 +98,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/farm_management
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
+      DATABASE_URL: mysql://root:password@mysql:3306/farm_management
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
       DB_PASSWORD: password
       DB_NAME: farm_management
       INFLUX_URL: http://influxdb:8086
@@ -120,7 +121,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
       influxdb:
         condition: service_healthy
@@ -159,14 +160,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DEFAULT_SERVER: mysql
     depends_on:
-      - postgres
+      - mysql
     networks:
       - farm-network
 
 volumes:
-  postgres_data:
+  mysql_data:
   influxdb_data:
   redis_data:
   mqtt_data:

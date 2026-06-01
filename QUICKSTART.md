@@ -6,7 +6,7 @@
 
 - **操作系统**: Windows 10/11, macOS, 或 Linux
 - **Node.js**: v18.0.0 或更高版本
-- **PostgreSQL**: v14 或更高版本
+- **MySQL**: v14 或更高版本
 - **InfluxDB**: v2.7 或更高版本 (可选，用于时序数据)
 - **Redis**: v6.0 或更高版本 (可选，用于缓存)
 - **MQTT Broker**: 如 Mosquitto (可选，用于物联网设备通信)
@@ -24,13 +24,13 @@
    npm --version
    ```
 
-### 2. 安装 PostgreSQL
+### 2. 安装 MySQL
 
-1. 访问 [PostgreSQL 下载页](https://www.postgresql.org/download/windows/)
-2. 下载 PostgreSQL 安装程序 (推荐 v16.x)
+1. 访问 [MySQL 下载页](https://www.mysql.org/download/windows/)
+2. 下载 MySQL 安装程序 (推荐 v16.x)
 3. 运行安装程序:
    - 设置密码 (记住此密码，后续需要用到)
-   - 保持默认端口 5432
+   - 保持默认端口 3306
    - 保持默认其他选项
 4. 安装完成后，验证安装:
    ```powershell
@@ -55,9 +55,9 @@
 
 ### 4. 创建项目数据库
 
-1. 打开 PowerShell，连接到 PostgreSQL:
+1. 打开 PowerShell，连接到 MySQL:
    ```powershell
-   psql -U postgres
+   mysql -u root -p
    ```
    (输入安装时设置的密码)
 
@@ -83,8 +83,8 @@
 
 2. 编辑 `.env` 文件，修改以下配置:
    ```env
-   # 修改数据库密码为您的 PostgreSQL 密码
-   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/farm_management
+   # 修改数据库密码为您的 MySQL 密码
+   DATABASE_URL=mysql://root:YOUR_PASSWORD@localhost:3306/farm_management
    DB_PASSWORD=YOUR_PASSWORD
    
    # 如果使用 InfluxDB，请修改以下配置
@@ -145,7 +145,7 @@ npm run dev
 [INFO] Server listening on port 3000
 [INFO] Environment: development
 [INFO] API Base URL: http://localhost:3000/api/v1
-[INFO] Connected to PostgreSQL database
+[INFO] Connected to MySQL database
 ```
 
 ### 9. 启动前端服务器
@@ -188,18 +188,18 @@ npm run dev
 2. 确保安装时勾选 "Add to PATH" 选项
 3. 重启 PowerShell 窗口
 
-### 问题 2: 无法连接到 PostgreSQL
+### 问题 2: 无法连接到 MySQL
 
-**原因**: PostgreSQL 服务未启动或密码错误
+**原因**: MySQL 服务未启动或密码错误
 
 **解决方法**:
-1. 检查 PostgreSQL 服务是否运行:
+1. 检查 MySQL 服务是否运行:
    ```powershell
-   Get-Service postgresql*
+   Get-Service mysql*
    ```
 2. 如果服务未运行，启动它:
    ```powershell
-   Start-Service postgresql*
+   Start-Service mysql*
    ```
 3. 检查 `.env` 文件中的数据库密码是否正确
 

@@ -6,7 +6,7 @@
 
 ## Summary
 
-农场管家系统是一个综合性农场信息化管理平台，涵盖六大核心模块：农场生产要素管理、种植计划与流程管理、农事操作管理、库存管理、质量追溯体系、成本核算与产量预估。系统采用Web应用架构，前端使用Vue 3 + TypeScript，后端使用Node.js + TypeScript，数据存储采用PostgreSQL（业务数据）+ InfluxDB（时序数据），通过MQTT协议与物联网设备通信。
+农场管家系统是一个综合性农场信息化管理平台，涵盖六大核心模块：农场生产要素管理、种植计划与流程管理、农事操作管理、库存管理、质量追溯体系、成本核算与产量预估。系统采用Web应用架构，前端使用Vue 3 + TypeScript，后端使用Node.js + TypeScript，数据存储采用MySQL（业务数据）+ InfluxDB（时序数据），通过MQTT协议与物联网设备通信。
 
 ## Technical Context
 
@@ -20,10 +20,10 @@
 **Primary Dependencies**: 
 - 后端: Express.js, TypeORM, jsonwebtoken, mqtt, qrcode
 - 前端: Vue 3, Element Plus, Pinia, Vue Router, Axios
-- 数据库: PostgreSQL 15+, InfluxDB 2.x
+- 数据库: MySQL 15+, InfluxDB 2.x
 
 **Storage**: 
-- PostgreSQL: 业务数据（地块、品种、人员、设备、农事操作、库存、销售等）
+- MySQL: 业务数据（地块、品种、人员、设备、农事操作、库存、销售等）
 - InfluxDB: 时序数据（物联网传感器数据：温湿度、土壤墒情、光照等）
 - 文件系统: 追溯报告PDF、导出文件
 
@@ -68,7 +68,7 @@
 | 传感器数据采集校验 | ✅ 通过 | 系统支持物联网传感器数据接入，校验机制在规范中定义 |
 | 数据传输完整性 | ✅ 通过 | 使用MQTT QoS ≥ 1 + TLS加密传输 |
 | 数据入库前核对 | ✅ 通过 | 必填字段校验、异常数据拒绝规则 |
-| 强类型数据存储 | ✅ 通过 | PostgreSQL使用强类型字段，InfluxDB使用时序数据类型 |
+| 强类型数据存储 | ✅ 通过 | MySQL使用强类型字段，InfluxDB使用时序数据类型 |
 | 数据校验失败告警 | ✅ 通过 | 异常数据拦截事件触发实时告警 |
 
 ### II. 操作流程可追溯 (Operation Traceability)
@@ -173,7 +173,7 @@ farm-management-system/
 │
 ├── docker/                     # Docker配置
 │   ├── docker-compose.yml
-│   ├── postgres/
+│   ├── mysql/
 │   ├── influxdb/
 │   └── backend/
 │

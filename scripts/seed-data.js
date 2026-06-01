@@ -2,7 +2,7 @@
 const crypto = require('crypto');
 const {Client} = require('../backend/node_modules/pg');
 
-const db = new Client({host:'localhost',port:5432,user:'postgres',password:'LZY123',database:'farm_management'});
+const db = new Client({host:'localhost',port:3306,user:'root',password:'LZY123',database:'farm_management'});
 const u = ()=>crypto.randomUUID();
 const f = d=>d.toISOString().split('T')[0];
 function ago(n){const d=new Date();d.setDate(d.getDate()-n);return d;}

@@ -18,7 +18,7 @@
 **后端:**
 - Node.js + TypeScript
 - Express.js
-- PostgreSQL + TypeORM
+- MySQL + TypeORM
 - InfluxDB (时序数据)
 - MQTT (物联网通信)
 - Redis (缓存)
@@ -37,7 +37,7 @@
 ### 环境要求
 
 1. **Node.js** (v18 或更高版本) - [下载地址](https://nodejs.org/)
-2. **PostgreSQL** (v14 或更高版本) - [下载地址](https://www.postgresql.org/download/)
+2. **MySQL** (v14 或更高版本) - [下载地址](https://www.mysql.org/download/)
 3. **InfluxDB** (v2.7 或更高版本) - [下载地址](https://portal.influxdata.com/downloads/)
 4. **Redis** (可选) - [下载地址](https://redis.io/download/)
 5. **MQTT Broker** (可选, 如 Mosquitto) - [下载地址](https://mosquitto.org/download/)
@@ -70,11 +70,11 @@ npm install
 NODE_ENV=development
 PORT=3000
 
-# 数据库配置 (PostgreSQL)
-DATABASE_URL=postgresql://postgres:password@localhost:5432/farm_management
+# 数据库配置 (MySQL)
+DATABASE_URL=mysql://root:password@localhost:3306/farm_management
 DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
+DB_PORT=3306
+DB_USER=root
 DB_PASSWORD=your_password
 DB_NAME=farm_management
 
@@ -111,8 +111,8 @@ VITE_APP_TITLE=农场管家系统
 #### 5. 创建数据库
 
 ```bash
-# 连接到 PostgreSQL 并创建数据库
-psql -U postgres
+# 连接到 MySQL 并创建数据库
+mysql -u root -p
 CREATE DATABASE farm_management;
 ```
 
