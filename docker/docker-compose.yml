@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: farm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: farm_user
+      POSTGRES_PASSWORD: farm_password
+      POSTGRES_DB: farm_management
+      TZ: Asia/Shanghai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - farm-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U farm_user -d farm_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # InfluxDB 时序数据库
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: farm-influxdb
+    restart: unless-stopped
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: farm_user
+      DOCKER_INFLUXDB_INIT_PASSWORD: farm_password
+      DOCKER_INFLUXDB_INIT_ORG: farm_org
+      DOCKER_INFLUXDB_INIT_BUCKET: farm_management
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: farm-admin-token-2026
+      TZ: Asia/Shanghai
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
+    networks:
+      - farm-network
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # EMQX MQTT Broker
+  emqx:
+    image: emqx/emqx:5.1-alpine
+    container_name: farm-emqx
+    restart: unless-stopped
+    environment:
+      EMQX_NODE_NAME: emqx@127.0.0.1
+      EMQX_NODE_COOKIE: farm_secret_cookie
+      EMQX_DASHBOARD__DEFAULT_USERNAME: admin
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: farm_admin_password
+      TZ: Asia/Shanghai
+    ports:
+      - "1883:1883"   # MQTT TCP
+      - "8083:8083"   # MQTT WebSocket
+      - "8084:8084"   # MQTT SSL
+      - "8883:8883"   # MQTT WSS
+      - "18083:18083" # Dashboard
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_log:/opt/emqx/log
+    networks:
+      - farm-network
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: farm-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass farm_redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - farm-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "farm_redis_password", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Redis Insight (可选，用于管理 Redis)
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: farm-redis-insight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    networks:
+      - farm-network
+    depends_on:
+      - redis
+
+networks:
+  farm-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  influxdb_data:
+  influxdb_config:
+  emqx_data:
+  emqx_log:
+  redis_data:
