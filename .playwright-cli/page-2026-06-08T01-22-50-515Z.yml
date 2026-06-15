@@ -1,0 +1,18 @@
+- main [ref=e4]:
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - heading "农场管家系统" [level=1] [ref=e9]
+      - paragraph [ref=e10]: 智能化农场管理平台
+    - heading "欢迎登录" [level=2] [ref=e11]
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]: 用户名
+        - textbox "用户名" [ref=e15]:
+          - /placeholder: 请输入用户名
+      - generic [ref=e16]:
+        - generic [ref=e17]: 密码
+        - generic [ref=e18]:
+          - textbox "密码" [ref=e19]:
+            - /placeholder: 请输入密码
+          - generic [ref=e20] [cursor=pointer]: 👁
+      - button "登录" [ref=e21] [cursor=pointer]

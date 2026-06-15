@@ -1,0 +1,378 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]:
+        - generic [ref=e9]: 🌾
+      - generic [ref=e10]:
+        - generic [ref=e11]: 农场管家
+        - generic [ref=e12]: Smart Farm
+    - navigation [ref=e13]:
+      - generic [ref=e14]: 主菜单
+      - link "仪表盘" [ref=e15] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e18]
+        - generic [ref=e20]: 仪表盘
+      - generic [ref=e22]: 业务管理
+      - link "地块管理" [ref=e23] [cursor=pointer]:
+        - /url: /plots
+        - img [ref=e26]
+        - generic [ref=e29]: 地块管理
+      - link "品种管理" [ref=e30] [cursor=pointer]:
+        - /url: /varieties
+        - img [ref=e33]
+        - generic [ref=e35]: 品种管理
+      - link "员工管理" [ref=e36] [cursor=pointer]:
+        - /url: /staff
+        - img [ref=e39]
+        - generic [ref=e41]: 员工管理
+      - link "设备管理" [ref=e42] [cursor=pointer]:
+        - /url: /equipment
+        - img [ref=e45]
+        - generic [ref=e47]: 设备管理
+      - link "农事操作" [ref=e48] [cursor=pointer]:
+        - /url: /farming-operations
+        - img [ref=e51]
+        - generic [ref=e54]: 农事操作
+      - generic [ref=e55]: 生产运营
+      - link "种植计划" [ref=e56] [cursor=pointer]:
+        - /url: /planting-plans
+        - img [ref=e59]
+        - generic [ref=e61]: 种植计划
+      - link "库存管理" [ref=e62] [cursor=pointer]:
+        - /url: /inventory
+        - img [ref=e65]
+        - generic [ref=e69]: 库存管理
+      - link "质量追溯" [ref=e70] [cursor=pointer]:
+        - /url: /traceability
+        - img [ref=e73]
+        - generic [ref=e75]: 质量追溯
+      - link "成本核算" [ref=e76] [cursor=pointer]:
+        - /url: /costs
+        - img [ref=e79]
+        - generic [ref=e83]: 成本核算
+      - generic [ref=e84]: 监控 & 系统
+      - link "IoT监控" [ref=e85] [cursor=pointer]:
+        - /url: /iot
+        - img [ref=e88]
+        - generic [ref=e91]: IoT监控
+      - link "预警管理" [ref=e92] [cursor=pointer]:
+        - /url: /alerts
+        - img [ref=e95]
+        - generic [ref=e98]: 预警管理
+      - link "消息通知 99+" [ref=e99] [cursor=pointer]:
+        - /url: /notifications
+        - img [ref=e102]
+        - generic [ref=e106]: 消息通知
+        - generic [ref=e107]: 99+
+      - link "系统设置" [ref=e109] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e112]
+        - generic [ref=e114]: 系统设置
+    - generic [ref=e115]:
+      - generic [ref=e116]:
+        - generic [ref=e118]: 管
+        - generic [ref=e119]:
+          - generic [ref=e120]: 管理员
+          - generic [ref=e121]: 系统管理员
+      - button "退出登录" [ref=e122] [cursor=pointer]:
+        - img [ref=e124]
+        - generic [ref=e127]: 退出登录
+  - main [ref=e128]:
+    - generic [ref=e129]:
+      - generic [ref=e130]:
+        - heading "预警管理中心" [level=2] [ref=e131]:
+          - img [ref=e133]
+          - text: 预警管理中心
+        - button "刷新" [ref=e136] [cursor=pointer]:
+          - img [ref=e138]
+          - generic [ref=e140]: 刷新
+      - generic [ref=e141]:
+        - generic [ref=e142]:
+          - generic [ref=e143]: "114"
+          - generic [ref=e144]: 告警总数
+        - generic [ref=e145]:
+          - generic [ref=e146]: "114"
+          - generic [ref=e147]: 未处理
+        - generic [ref=e148]:
+          - generic [ref=e149]: "114"
+          - generic [ref=e150]: 今日告警
+        - generic [ref=e151]:
+          - generic [ref=e152]: "0"
+          - generic [ref=e153]: 严重告警
+      - generic [ref=e154]:
+        - tablist [ref=e158]:
+          - tab "告警历史" [selected] [ref=e160]
+          - tab "阈值配置" [ref=e161]
+          - tab "告警统计" [ref=e162]
+        - tabpanel "告警历史" [ref=e164]:
+          - generic [ref=e165]:
+            - generic [ref=e167] [cursor=pointer]:
+              - generic:
+                - combobox [ref=e169]
+                - generic [ref=e170]: 全部级别
+              - img [ref=e173]
+            - generic [ref=e176] [cursor=pointer]:
+              - generic:
+                - combobox [ref=e178]
+                - generic [ref=e179]: 全部类型
+              - img [ref=e182]
+            - generic [ref=e185] [cursor=pointer]:
+              - generic:
+                - combobox [ref=e187]
+                - generic [ref=e188]: 全部状态
+              - img [ref=e191]
+          - generic [ref=e193]:
+            - generic [ref=e194]:
+              - generic [ref=e195]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 超正常范围
+                - generic [ref=e196]: 湿度 数值 92.6% 超出正常范围 [25~92]
+              - generic [ref=e197]:
+                - generic [ref=e198]: DEV-C01-HU
+                - generic [ref=e199]: 06/08 10:46
+                - button "处理" [ref=e200] [cursor=pointer]:
+                  - generic [ref=e201]: 处理
+            - generic [ref=e202]:
+              - generic [ref=e203]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e204]: "设备 DEV-A01-HU 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e205]:
+                - generic [ref=e206]: DEV-A01-HU
+                - generic [ref=e207]: 06/08 10:46
+                - button "处理" [ref=e208] [cursor=pointer]:
+                  - generic [ref=e209]: 处理
+            - generic [ref=e210]:
+              - generic [ref=e211]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e212]: "设备 DEV-A01-SM 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e213]:
+                - generic [ref=e214]: DEV-A01-SM
+                - generic [ref=e215]: 06/08 10:46
+                - button "处理" [ref=e216] [cursor=pointer]:
+                  - generic [ref=e217]: 处理
+            - generic [ref=e218]:
+              - generic [ref=e219]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e220]: "设备 DEV-A01-TH 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e221]:
+                - generic [ref=e222]: DEV-A01-TH
+                - generic [ref=e223]: 06/08 10:46
+                - button "处理" [ref=e224] [cursor=pointer]:
+                  - generic [ref=e225]: 处理
+            - generic [ref=e226]:
+              - generic [ref=e227]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e228]: "设备 DEV-A02-HU 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e229]:
+                - generic [ref=e230]: DEV-A02-HU
+                - generic [ref=e231]: 06/08 10:46
+                - button "处理" [ref=e232] [cursor=pointer]:
+                  - generic [ref=e233]: 处理
+            - generic [ref=e234]:
+              - generic [ref=e235]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e236]: "设备 DEV-A02-SM 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e237]:
+                - generic [ref=e238]: DEV-A02-SM
+                - generic [ref=e239]: 06/08 10:46
+                - button "处理" [ref=e240] [cursor=pointer]:
+                  - generic [ref=e241]: 处理
+            - generic [ref=e242]:
+              - generic [ref=e243]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e244]: "设备 DEV-A02-TH 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e245]:
+                - generic [ref=e246]: DEV-A02-TH
+                - generic [ref=e247]: 06/08 10:46
+                - button "处理" [ref=e248] [cursor=pointer]:
+                  - generic [ref=e249]: 处理
+            - generic [ref=e250]:
+              - generic [ref=e251]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e252]: "设备 DEV-B01-HU 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e253]:
+                - generic [ref=e254]: DEV-B01-HU
+                - generic [ref=e255]: 06/08 10:46
+                - button "处理" [ref=e256] [cursor=pointer]:
+                  - generic [ref=e257]: 处理
+            - generic [ref=e258]:
+              - generic [ref=e259]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e260]: "设备 DEV-B01-SM 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e261]:
+                - generic [ref=e262]: DEV-B01-SM
+                - generic [ref=e263]: 06/08 10:46
+                - button "处理" [ref=e264] [cursor=pointer]:
+                  - generic [ref=e265]: 处理
+            - generic [ref=e266]:
+              - generic [ref=e267]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e268]: "设备 DEV-B01-TH 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e269]:
+                - generic [ref=e270]: DEV-B01-TH
+                - generic [ref=e271]: 06/08 10:46
+                - button "处理" [ref=e272] [cursor=pointer]:
+                  - generic [ref=e273]: 处理
+            - generic [ref=e274]:
+              - generic [ref=e275]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e276]: "设备 DEV-B02-HU 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e277]:
+                - generic [ref=e278]: DEV-B02-HU
+                - generic [ref=e279]: 06/08 10:46
+                - button "处理" [ref=e280] [cursor=pointer]:
+                  - generic [ref=e281]: 处理
+            - generic [ref=e282]:
+              - generic [ref=e283]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e284]: "设备 DEV-B02-SM 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e285]:
+                - generic [ref=e286]: DEV-B02-SM
+                - generic [ref=e287]: 06/08 10:46
+                - button "处理" [ref=e288] [cursor=pointer]:
+                  - generic [ref=e289]: 处理
+            - generic [ref=e290]:
+              - generic [ref=e291]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e292]: "设备 DEV-B02-TH 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e293]:
+                - generic [ref=e294]: DEV-B02-TH
+                - generic [ref=e295]: 06/08 10:46
+                - button "处理" [ref=e296] [cursor=pointer]:
+                  - generic [ref=e297]: 处理
+            - generic [ref=e298]:
+              - generic [ref=e299]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e300]: "设备 DEV-C01-HU 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e301]:
+                - generic [ref=e302]: DEV-C01-HU
+                - generic [ref=e303]: 06/08 10:46
+                - button "处理" [ref=e304] [cursor=pointer]:
+                  - generic [ref=e305]: 处理
+            - generic [ref=e306]:
+              - generic [ref=e307]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e308]: "设备 DEV-C01-SM 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e309]:
+                - generic [ref=e310]: DEV-C01-SM
+                - generic [ref=e311]: 06/08 10:46
+                - button "处理" [ref=e312] [cursor=pointer]:
+                  - generic [ref=e313]: 处理
+            - generic [ref=e314]:
+              - generic [ref=e315]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e316]: "设备 DEV-C01-TH 已离线超过30分钟（最后数据: 2026/6/5 15:48:24）"
+              - generic [ref=e317]:
+                - generic [ref=e318]: DEV-C01-TH
+                - generic [ref=e319]: 06/08 10:46
+                - button "处理" [ref=e320] [cursor=pointer]:
+                  - generic [ref=e321]: 处理
+            - generic [ref=e322]:
+              - generic [ref=e323]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e324]: "设备 SENSOR-001 已离线超过30分钟（最后数据: 2026/6/8 02:42:31）"
+              - generic [ref=e325]:
+                - generic [ref=e326]: SENSOR-001
+                - generic [ref=e327]: 06/08 10:46
+                - button "处理" [ref=e328] [cursor=pointer]:
+                  - generic [ref=e329]: 处理
+            - generic [ref=e330]:
+              - generic [ref=e331]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e332]: "设备 SENSOR-002 已离线超过30分钟（最后数据: 2026/6/8 02:32:31）"
+              - generic [ref=e333]:
+                - generic [ref=e334]: SENSOR-002
+                - generic [ref=e335]: 06/08 10:46
+                - button "处理" [ref=e336] [cursor=pointer]:
+                  - generic [ref=e337]: 处理
+            - generic [ref=e338]:
+              - generic [ref=e339]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 设备离线
+                - generic [ref=e340]: "设备 SENSOR-003 已离线超过30分钟（最后数据: 2026/6/8 02:42:31）"
+              - generic [ref=e341]:
+                - generic [ref=e342]: SENSOR-003
+                - generic [ref=e343]: 06/08 10:46
+                - button "处理" [ref=e344] [cursor=pointer]:
+                  - generic [ref=e345]: 处理
+            - generic [ref=e346]:
+              - generic [ref=e347]:
+                - generic:
+                  - generic: 警告
+                - generic:
+                  - generic: 超正常范围
+                - generic [ref=e348]: 湿度 数值 92.6% 超出正常范围 [25~92]
+              - generic [ref=e349]:
+                - generic [ref=e350]: DEV-C01-HU
+                - generic [ref=e351]: 06/08 10:46
+                - button "处理" [ref=e352] [cursor=pointer]:
+                  - generic [ref=e353]: 处理
+          - generic [ref=e355]:
+            - button "Go to previous page" [disabled] [ref=e356]:
+              - generic:
+                - img
+            - list [ref=e357]:
+              - listitem "page 1" [ref=e358]: "1"
+              - listitem "page 2" [ref=e359] [cursor=pointer]: "2"
+              - listitem "page 3" [ref=e360] [cursor=pointer]: "3"
+              - listitem "page 4" [ref=e361] [cursor=pointer]: "4"
+              - listitem "page 5" [ref=e362] [cursor=pointer]: "5"
+              - listitem "page 6" [ref=e363] [cursor=pointer]: "6"
+            - button "Go to next page" [ref=e364] [cursor=pointer]:
+              - generic:
+                - img
