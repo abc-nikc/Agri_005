@@ -12,7 +12,7 @@ export class Plot extends BaseEntity {
   @Column({ name: 'current_variety_id', nullable: true })
   currentVarietyId?: string;
 
-  @Column({ name: 'status', type: 'enum', enum: ['已种植', '闲置'] })
+  @Column({ name: 'status', type: 'varchar', length: 20, default: '闲置' })
   @Index()
   status!: string;
 

@@ -31,7 +31,7 @@
 **理由**:
 - Node.js 异步 I/O 适合处理大量物联网设备并发连接
 - TypeScript 提供端到端类型安全（前后端共享类型定义）
-- TypeORM 支持 PostgreSQL 和复杂关系映射
+- TypeORM 支持 MySQL 和复杂关系映射
 - 单语言开发（JavaScript/TypeScript）降低团队成本
 - 丰富的 MQTT 客户端库（如 `mqtt`、`aedes`）
 
@@ -45,13 +45,13 @@
 
 ### 决策 3: 数据库选型
 
-**决策**: PostgreSQL 15+ (业务数据) + InfluxDB 2.x (时序数据)
+**决策**: MySQL 8.0+ (业务数据) + InfluxDB 2.x (时序数据)
 
 **理由**:
-- PostgreSQL:
+- MySQL:
   - 强事务支持（ACID），适合业务数据（库存、财务、人员）
   - 丰富的约束机制（外键、CHECK约束、触发器）
-  - JSONB 类型支持半结构化数据（如设备配置、种植规范）
+  - JSON 类型支持半结构化数据（如设备配置、种植规范）
   - 成熟的备份和恢复机制
   
 - InfluxDB:
@@ -61,10 +61,10 @@
   - 适合传感器数据（温湿度、土壤墒情、光照等）
 
 **数据存储策略**:
-- PostgreSQL: 地块、品种、人员、设备、农事操作、库存、销售、审计日志
+- MySQL: 地块、品种、人员、设备、农事操作、库存、销售、审计日志
 - InfluxDB: 传感器采集数据（measurement: `sensor_data`, tags: `device_id`, `plot_id`; fields: `temperature`, `humidity`, `soil_moisture`, etc.）
 
-**结论**: 采用 PostgreSQL + InfluxDB 双数据库架构
+**结论**: 采用 MySQL + InfluxDB 双数据库架构
 
 ---
 
@@ -176,7 +176,7 @@ class WechatNotificationChannel implements NotificationChannel { ... }
 ### 决策 8: 数据保留与归档策略
 
 **决策**: 
-- 业务数据（PostgreSQL）：永久保留（审计要求）
+- 业务数据（MySQL）：永久保留（审计要求）
 - 时序数据（InfluxDB）：保留 1 年原始数据，1 年后降采样保留每日聚合值
 
 **理由**:

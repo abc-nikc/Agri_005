@@ -16,7 +16,7 @@ export const useVarietyStore = defineStore('variety', () => {
     try {
       varieties.value = await varietyService.getVarieties(params);
     } catch (err: any) {
-      error.value = err.response?.data?.message || '获取品种列表失败';
+      error.value = err.response?.data?.error || err.response?.data?.message || '获取品种列表失败';
       throw err;
     } finally {
       loading.value = false;
@@ -30,7 +30,7 @@ export const useVarietyStore = defineStore('variety', () => {
     try {
       currentVariety.value = await varietyService.getVariety(id);
     } catch (err: any) {
-      error.value = err.response?.data?.message || '获取品种详情失败';
+      error.value = err.response?.data?.error || err.response?.data?.message || '获取品种详情失败';
       throw err;
     } finally {
       loading.value = false;
@@ -46,7 +46,7 @@ export const useVarietyStore = defineStore('variety', () => {
       varieties.value.push(newVariety);
       return newVariety;
     } catch (err: any) {
-      error.value = err.response?.data?.message || '创建品种失败';
+      error.value = err.response?.data?.error || err.response?.data?.message || '创建品种失败';
       throw err;
     } finally {
       loading.value = false;
@@ -68,7 +68,7 @@ export const useVarietyStore = defineStore('variety', () => {
       }
       return updatedVariety;
     } catch (err: any) {
-      error.value = err.response?.data?.message || '更新品种失败';
+      error.value = err.response?.data?.error || err.response?.data?.message || '更新品种失败';
       throw err;
     } finally {
       loading.value = false;
@@ -83,7 +83,7 @@ export const useVarietyStore = defineStore('variety', () => {
       await varietyService.deleteVariety(id);
       varieties.value = varieties.value.filter((v) => v.id !== id);
     } catch (err: any) {
-      error.value = err.response?.data?.message || '删除品种失败';
+      error.value = err.response?.data?.error || err.response?.data?.message || '删除品种失败';
       throw err;
     } finally {
       loading.value = false;

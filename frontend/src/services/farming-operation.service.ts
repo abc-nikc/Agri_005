@@ -1,18 +1,5 @@
-import axios from 'axios';
 import type { FarmingOperation, CreateOperationDto, UpdateOperationDto } from '@/types/farming-operation';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import { apiClient } from './api-client';
 
 export const farmingOperationService = {
   async getAll(params?: any): Promise<FarmingOperation[]> {

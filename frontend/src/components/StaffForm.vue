@@ -14,7 +14,10 @@
         </div>
         <div class="form-group" v-if="!isEdit">
           <label for="password">密码 *</label>
-          <input id="password" v-model="formData.password" type="password" required placeholder="至少6位" />
+          <div class="pwd-wrap">
+            <input id="password" v-model="formData.password" :type="showPwd ? 'text' : 'password'" required placeholder="至少6位" />
+            <span class="pwd-eye" @click="showPwd = !showPwd">{{ showPwd ? '🙈' : '👁' }}</span>
+          </div>
         </div>
         <div class="form-group">
           <label for="systemRole">系统角色 *</label>
@@ -55,9 +58,10 @@ const emit = defineEmits<{ (e: 'save', data: CreateStaffDto): void; (e: 'cancel'
 
 const loading = ref(false);
 const errorMsg = ref<string | null>(null);
-const formData = ref<CreateStaffDto>({
+const showPwd = ref(false);
+const formData = ref<any>({
   name: '', username: '', password: '', systemRole: '操作员',
-  businessDivision: '', contactPhone: '',
+  businessDivision: '', contactPhone: '', isActive: true,
 });
 
 const isEdit = computed(() => !!props.staff);
@@ -71,6 +75,7 @@ onMounted(() => {
       systemRole: props.staff.systemRole || '操作员',
       businessDivision: props.staff.businessDivision || '',
       contactPhone: props.staff.contactPhone || '',
+      isActive: props.staff.isActive !== false,
     };
   }
 });
@@ -85,7 +90,7 @@ const handleSubmit = async () => {
       loading.value = false;
       return;
     }
-    if (isEdit.value) { delete dataToSend.password; }
+    if (isEdit.value) { delete dataToSend.password; } else { delete dataToSend.isActive; }
     if (!dataToSend.businessDivision) delete dataToSend.businessDivision;
     if (!dataToSend.contactPhone) delete dataToSend.contactPhone;
     await emit('save', dataToSend);
@@ -107,5 +112,9 @@ const handleSubmit = async () => {
 .btn-primary { background: #007bff; color: white; }
 .btn-secondary { background: #6c757d; color: white; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pwd-wrap { position: relative; display: flex; align-items: center; }
+.pwd-wrap input { width: 100%; padding-right: 36px; }
+.pwd-eye { position: absolute; right: 10px; cursor: pointer; font-size: 1.1rem; user-select: none; opacity: 0.6; }
+.pwd-eye:hover { opacity: 1; }
 .error-banner { background: #f8d7da; color: #721c24; padding: 10px 14px; border-radius: 4px; margin-bottom: 16px; font-size: 14px; }
 </style>

@@ -35,8 +35,8 @@ export const useEquipmentStore = defineStore('equipment', () => {
     try { await equipmentService.deleteEquipment(id); equipmentList.value = equipmentList.value.filter(x => x.id !== id); } catch (e: any) { error.value = getError(e); throw e; } finally { loading.value = false; }
   }
   async function fetchMaintenanceAlerts() {
-    loading.value = true; error.value = null;
-    try { maintenanceAlerts.value = await equipmentService.getMaintenanceAlerts(); } catch (e: any) { error.value = getError(e); } finally { loading.value = false; }
+    loading.value = true;
+    try { maintenanceAlerts.value = await equipmentService.getMaintenanceAlerts(); } catch (e: any) { /* 静默失败，不阻断页面 */ } finally { loading.value = false; }
   }
   function clearError() { error.value = null; }
   return { equipmentList, currentEquipment, loading, error, maintenanceAlerts, fetchEquipment, fetchEquipmentItem, createEquipment, updateEquipment, deleteEquipment, fetchMaintenanceAlerts, clearError };

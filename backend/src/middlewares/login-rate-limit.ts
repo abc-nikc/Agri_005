@@ -22,7 +22,7 @@ export const loginRateLimit = async (req: Request, res: Response, next: NextFunc
     }
 
     (req as any).loginAttemptKey = key;
-    next();
+    return next();
   } catch {
     // Redis 不可用时降级到内存
     const { username } = req.body;
@@ -43,7 +43,7 @@ export const loginRateLimit = async (req: Request, res: Response, next: NextFunc
       memoryAttempts.set(key, { count: 0, firstAttempt: now });
     }
     (req as any).loginAttemptKey = key;
-    next();
+    return next();
   }
 };
 

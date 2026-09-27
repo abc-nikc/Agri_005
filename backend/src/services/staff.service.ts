@@ -10,10 +10,22 @@ export class StaffService {
     this.staffRepository = AppDataSource.getRepository(Staff);
   }
 
-  async findAll(includeInactive: boolean = false): Promise<Staff[]> {
-    const where: any = {};
-    if (!includeInactive) where.isActive = true;
-    return await this.staffRepository.find({ where, order: { name: 'ASC' } });
+  async findAll(includeInactive: boolean = false, filters?: { search?: string; systemRole?: string; isActive?: boolean }): Promise<Staff[]> {
+    const qb = this.staffRepository.createQueryBuilder('staff');
+
+    if (filters?.search) {
+      qb.andWhere('staff.name LIKE :search OR staff.username LIKE :search', { search: `%${filters.search}%` });
+    }
+    if (filters?.systemRole) {
+      qb.andWhere('staff.systemRole = :role', { role: filters.systemRole });
+    }
+    if (filters?.isActive !== undefined) {
+      qb.andWhere('staff.isActive = :isActive', { isActive: filters.isActive });
+    } else if (!includeInactive) {
+      qb.andWhere('staff.isActive = 1');
+    }
+
+    return await qb.orderBy('staff.name', 'ASC').getMany();
   }
 
   async findById(id: string): Promise<Staff | null> {
@@ -28,18 +40,16 @@ export class StaffService {
     const existing = await this.findByUsername(staffData.username);
     if (existing) throw new Error(`用户名 ${staffData.username} 已存在`);
 
-    // 映射前端字段 password → passwordHash
-    if (staffData.password && !staffData.passwordHash) {
-      staffData.passwordHash = staffData.password;
-      delete staffData.password;
-    }
+    // 密码哈希处理
+    const plainPassword = staffData.password || staffData.passwordHash;
+    if (!plainPassword) throw new Error('密码不能为空');
+    if (!validatePasswordStrength(plainPassword)) throw new Error('密码至少6位');
 
-    if (staffData.passwordHash && !validatePasswordStrength(staffData.passwordHash)) {
-      throw new Error('密码至少6位');
-    }
+    staffData.passwordHash = await hashPassword(plainPassword);
+    delete staffData.password;
 
-    const staff = this.staffRepository.create(staffData);
-    return await this.staffRepository.save(staff);
+    const staff = this.staffRepository.create(staffData as any);
+    return await this.staffRepository.save(staff) as unknown as Promise<Staff>;
   }
 
   async update(id: string, staffData: any): Promise<Staff> {
@@ -51,11 +61,13 @@ export class StaffService {
       if (existing) throw new Error(`用户名 ${staffData.username} 已存在`);
     }
 
-    // 映射 password → passwordHash
-    if (staffData.password && !staffData.passwordHash) {
-      staffData.passwordHash = staffData.password;
-      delete staffData.password;
+    // 如果有新密码，进行哈希
+    if (staffData.password || staffData.passwordHash) {
+      const plainPassword = staffData.password || staffData.passwordHash;
+      if (!validatePasswordStrength(plainPassword)) throw new Error('密码至少6位');
+      staffData.passwordHash = await hashPassword(plainPassword);
     }
+    delete staffData.password;
 
     Object.assign(staff, staffData);
     return await this.staffRepository.save(staff);

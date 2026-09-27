@@ -101,3 +101,10 @@ Cargo.lock
 # Misc
 *.tgz
 *.tar.gz
+.workbuddy/
+reports/
+generated-images/
+*.sqlite
+*.sqlite-*
+*.png
+.playwright-cli/

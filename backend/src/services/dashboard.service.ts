@@ -1,6 +1,12 @@
+import { Repository } from 'typeorm';
+import { AppDataSource } from '../config/database';
 import { PlotService } from './plot.service';
 import { VarietyService } from './variety.service';
 import { StaffService } from './staff.service';
+import { AuditLog } from '../models/audit-log.entity';
+import { FarmingOperation } from '../models/farming-operation.entity';
+import { ProductionBatch } from '../models/production-batch.entity';
+import { Equipment } from '../models/equipment.entity';
 
 export class DashboardService {
   private plotService: PlotService;
@@ -15,7 +21,6 @@ export class DashboardService {
 
   /**
    * 获取仪表盘关键指标
-   * 返回：总面积、已种植面积、闲置面积、品种数量、员工数量
    */
   async getDashboardMetrics(): Promise<{
     totalArea: number;
@@ -25,13 +30,17 @@ export class DashboardService {
     staffCount: number;
     plotCount: number;
     activeStaffCount: number;
+    equipmentCount: number;
+    batchCount: number;
   }> {
-    // 并行获取各项数据
     const [plotStats, varieties, staffStats] = await Promise.all([
       this.plotService.getStatistics(),
       this.varietyService.findAll(),
       this.staffService.getStatistics(),
     ]);
+
+    const eqRepo = AppDataSource.getRepository(Equipment);
+    const batchRepo = AppDataSource.getRepository(ProductionBatch);
 
     return {
       totalArea: plotStats.totalArea,
@@ -41,6 +50,8 @@ export class DashboardService {
       staffCount: staffStats.totalStaff,
       plotCount: plotStats.plotCount,
       activeStaffCount: staffStats.activeStaff,
+      equipmentCount: await eqRepo.count(),
+      batchCount: await batchRepo.count(),
     };
   }
 
@@ -49,24 +60,12 @@ export class DashboardService {
    */
   async getPlotStatusDistribution(): Promise<{ status: string; count: number; area: number }[]> {
     const plots = await this.plotService.findAll();
-    
     const distribution = new Map<string, { count: number; area: number }>();
-    
     for (const plot of plots) {
-      const status = plot.status;
-      const existing = distribution.get(status) || { count: 0, area: 0 };
-      
-      distribution.set(status, {
-        count: existing.count + 1,
-        area: existing.area + Number(plot.area),
-      });
+      const existing = distribution.get(plot.status) || { count: 0, area: 0 };
+      distribution.set(plot.status, { count: existing.count + 1, area: existing.area + Number(plot.area) });
     }
-
-    return Array.from(distribution.entries()).map(([status, data]) => ({
-      status,
-      count: data.count,
-      area: data.area,
-    }));
+    return Array.from(distribution.entries()).map(([status, data]) => ({ status, count: data.count, area: data.area }));
   }
 
   /**
@@ -74,44 +73,84 @@ export class DashboardService {
    */
   async getVarietyCategoryDistribution(): Promise<{ category: string; count: number }[]> {
     const varieties = await this.varietyService.findAll();
-    
     const distribution = new Map<string, number>();
-    
     for (const variety of varieties) {
-      if (!variety.isActive) {
-        continue;
-      }
-
-      const count = distribution.get(variety.category) || 0;
-      distribution.set(variety.category, count + 1);
+      if (!variety.isActive) continue;
+      distribution.set(variety.category, (distribution.get(variety.category) || 0) + 1);
     }
-
-    return Array.from(distribution.entries()).map(([category, count]) => ({
-      category,
-      count,
-    }));
+    return Array.from(distribution.entries()).map(([category, count]) => ({ category, count }));
   }
 
   /**
-   * 获取最近活动记录（从审计日志）
-   * 简化版：返回模拟数据
+   * 获取最近活动记录（从真实数据源）
    */
   async getRecentActivities(limit: number = 10): Promise<any[]> {
-    // 实际应该从 audit_logs 表查询
-    // 这里返回模拟数据
-    return [
-      {
-        id: '1',
-        action: '创建地块',
-        user: '管理员',
-        timestamp: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        action: '记录农事操作',
-        user: '操作员',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-      },
-    ];
+    const auditRepo = AppDataSource.getRepository(AuditLog);
+    const opRepo = AppDataSource.getRepository(FarmingOperation);
+
+    const activities: any[] = [];
+
+    // 1. 从审计日志获取
+    try {
+      const logs = await auditRepo.find({ order: { createdAt: 'DESC' }, take: limit });
+      for (const log of logs) {
+        activities.push({
+          id: log.id,
+          action: String(log.actionType),
+          user: log.username || '系统',
+          timestamp: log.createdAt.toISOString(),
+          source: 'audit',
+        });
+      }
+    } catch {}
+
+    // 2. 如果审计日志为空，从农事操作记录获取
+    if (activities.length === 0) {
+      try {
+        const ops = await opRepo.find({ order: { operationDate: 'DESC' }, take: limit });
+        for (const op of ops) {
+          activities.push({
+            id: op.id,
+            action: `${op.operationType} - ${op.varietyName || op.plotName || ''}`,
+            user: op.operatorName,
+            timestamp: op.operationDate.toISOString(),
+            source: 'operation',
+          });
+        }
+      } catch {}
+    }
+
+    return activities.slice(0, limit);
+  }
+
+  /**
+   * 获取近7天农事趋势数据（用于折线图）
+   */
+  async getOperationTrends(): Promise<{ dates: string[]; counts: number[] }> {
+    const opRepo = AppDataSource.getRepository(FarmingOperation);
+    const dates: string[] = [];
+    const counts: number[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      dates.push(dateStr.slice(5)); // MM-DD
+
+      try {
+        const count = await opRepo
+          .createQueryBuilder('o')
+          .where('o.operation_date >= :start AND o.operation_date < :end', {
+            start: dateStr + 'T00:00:00.000Z',
+            end: new Date(d.getTime() + 86400000).toISOString().slice(0, 10) + 'T00:00:00.000Z',
+          })
+          .getCount();
+        counts.push(count);
+      } catch {
+        counts.push(0);
+      }
+    }
+
+    return { dates, counts };
   }
 }

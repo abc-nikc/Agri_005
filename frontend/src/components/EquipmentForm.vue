@@ -14,6 +14,10 @@
             <option value="农机具">农机具</option>
             <option value="灌溉设备">灌溉设备</option>
             <option value="物联网设备">物联网设备</option>
+            <option value="施肥设备">施肥设备</option>
+            <option value="采摘设备">采摘设备</option>
+            <option value="监测设备">监测设备</option>
+            <option value="运输设备">运输设备</option>
           </select>
         </div>
         <div class="form-group">

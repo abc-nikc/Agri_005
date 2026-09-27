@@ -1,0 +1,179 @@
+- generic [ref=e3]:
+  - complementary [ref=e22]:
+    - heading "🌾 农场管家" [level=2] [ref=e24]
+    - navigation [ref=e25]:
+      - link "📊 仪表盘" [ref=e26] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e27]: 📊
+        - text: 仪表盘
+      - link "🌍 地块管理" [ref=e28] [cursor=pointer]:
+        - /url: /plots
+        - generic [ref=e29]: 🌍
+        - text: 地块管理
+      - link "🌱 品种管理" [ref=e30] [cursor=pointer]:
+        - /url: /varieties
+        - generic [ref=e31]: 🌱
+        - text: 品种管理
+      - link "👥 员工管理" [ref=e32] [cursor=pointer]:
+        - /url: /staff
+        - generic [ref=e33]: 👥
+        - text: 员工管理
+      - link "🔧 设备管理" [ref=e34] [cursor=pointer]:
+        - /url: /equipment
+        - generic [ref=e35]: 🔧
+        - text: 设备管理
+      - link "🚜 农事操作" [ref=e36] [cursor=pointer]:
+        - /url: /farming-operations
+        - generic [ref=e37]: 🚜
+        - text: 农事操作
+      - link "📋 种植计划" [ref=e38] [cursor=pointer]:
+        - /url: /planting-plans
+        - generic [ref=e39]: 📋
+        - text: 种植计划
+      - link "📦 库存管理" [ref=e40] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e41]: 📦
+        - text: 库存管理
+      - link "🔍 质量追溯" [ref=e42] [cursor=pointer]:
+        - /url: /traceability
+        - generic [ref=e43]: 🔍
+        - text: 质量追溯
+      - link "💰 成本核算" [ref=e44] [cursor=pointer]:
+        - /url: /costs
+        - generic [ref=e45]: 💰
+        - text: 成本核算
+      - link "📡 IoT监控" [ref=e46] [cursor=pointer]:
+        - /url: /iot
+        - generic [ref=e47]: 📡
+        - text: IoT监控
+      - link "🔔 消息 21" [ref=e48] [cursor=pointer]:
+        - /url: /notifications
+        - generic [ref=e49]: 🔔
+        - text: 消息
+        - generic [ref=e50]: "21"
+      - link "⚙️ 系统设置" [ref=e51] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e52]: ⚙️
+        - text: 系统设置
+    - button "退出登录" [ref=e54] [cursor=pointer]
+  - main [ref=e4]:
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - heading "农场管理仪表盘" [level=2] [ref=e57]
+        - generic [ref=e58] [cursor=pointer]: 🔄 刷新
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - heading "总面积" [level=3] [ref=e61]
+          - paragraph [ref=e62]: 340.00 亩
+        - generic [ref=e63]:
+          - heading "已种植" [level=3] [ref=e64]
+          - paragraph [ref=e65]: 190.00 亩
+        - generic [ref=e66]:
+          - heading "闲置" [level=3] [ref=e67]
+          - paragraph [ref=e68]: 150.00 亩
+        - generic [ref=e69]:
+          - heading "品种数量" [level=3] [ref=e70]
+          - paragraph [ref=e71]: "16"
+        - generic [ref=e72]:
+          - heading "员工总数" [level=3] [ref=e73]
+          - paragraph [ref=e74]: 5/6
+        - generic [ref=e75]:
+          - heading "设备总数" [level=3] [ref=e76]
+          - paragraph [ref=e77]: "7"
+        - generic [ref=e78]:
+          - heading "生产批次" [level=3] [ref=e79]
+          - paragraph [ref=e80]: "21"
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - heading "品种类别分布" [level=3] [ref=e83]
+          - generic [ref=e84]:
+            - img [ref=e85]
+            - generic [ref=e94]:
+              - generic [ref=e95]: 瓜果类 (2)
+              - generic [ref=e97]: 粮食 (1)
+              - generic [ref=e99]: 叶菜类 (3)
+              - generic [ref=e101]: 果菜类 (4)
+              - generic [ref=e103]: 根茎类 (2)
+              - generic [ref=e105]: 花菜类 (2)
+              - generic [ref=e107]: 浆果类 (1)
+              - generic [ref=e109]: 香料类 (1)
+        - generic [ref=e111]:
+          - heading "近7天农事活动趋势" [level=3] [ref=e112]
+          - img [ref=e114]:
+            - generic [ref=e123]: 06-02
+            - generic [ref=e124]: 06-03
+            - generic [ref=e125]: 06-04
+            - generic [ref=e126]: 06-05
+            - generic [ref=e127]: 06-06
+            - generic [ref=e128]: 06-07
+            - generic [ref=e129]: 06-08
+            - generic [ref=e130]: "0"
+            - generic [ref=e131]: "1"
+            - generic [ref=e132]: "1"
+            - generic [ref=e133]: "2"
+      - generic [ref=e134]:
+        - heading "地块状态分布" [level=3] [ref=e135]
+        - generic [ref=e136]:
+          - generic [ref=e137]:
+            - generic [ref=e138]: "3"
+            - generic [ref=e140]:
+              - text: 闲置
+              - generic [ref=e141]: 150.0亩
+          - generic [ref=e142]:
+            - generic [ref=e143]: "3"
+            - generic [ref=e145]:
+              - text: 已种植
+              - generic [ref=e146]: 190.0亩
+      - generic [ref=e147]:
+        - heading "最近活动" [level=3] [ref=e148]
+        - list [ref=e149]:
+          - listitem [ref=e150]:
+            - generic [ref=e151]: 🚜
+            - generic [ref=e152]: 采收 - 黄瓜
+            - generic [ref=e153]: 李克
+            - generic [ref=e154]: 06/02 15:55
+          - listitem [ref=e155]:
+            - generic [ref=e156]: 🚜
+            - generic [ref=e157]: 采收 - 西瓜
+            - generic [ref=e158]: 李克
+            - generic [ref=e159]: 06/01 15:55
+          - listitem [ref=e160]:
+            - generic [ref=e161]: 🚜
+            - generic [ref=e162]: 采收 - 番茄
+            - generic [ref=e163]: 李克
+            - generic [ref=e164]: 05/31 15:55
+          - listitem [ref=e165]:
+            - generic [ref=e166]: 🚜
+            - generic [ref=e167]: 采收 - 草莓
+            - generic [ref=e168]: 张农艺
+            - generic [ref=e169]: 05/30 15:55
+          - listitem [ref=e170]:
+            - generic [ref=e171]: 🚜
+            - generic [ref=e172]: 采收 - 辣椒
+            - generic [ref=e173]: 王强
+            - generic [ref=e174]: 05/28 15:55
+          - listitem [ref=e175]:
+            - generic [ref=e176]: 🚜
+            - generic [ref=e177]: 采收 - 冬瓜
+            - generic [ref=e178]: 王强
+            - generic [ref=e179]: 05/24 15:55
+          - listitem [ref=e180]:
+            - generic [ref=e181]: 🚜
+            - generic [ref=e182]: 采收 - 玉米
+            - generic [ref=e183]: 王强
+            - generic [ref=e184]: 05/20 15:55
+          - listitem [ref=e185]:
+            - generic [ref=e186]: 🚜
+            - generic [ref=e187]: 施肥 - 草莓
+            - generic [ref=e188]: 张农艺
+            - generic [ref=e189]: 05/18 15:55
+          - listitem [ref=e190]:
+            - generic [ref=e191]: 🚜
+            - generic [ref=e192]: 采收 - 茄子
+            - generic [ref=e193]: 李克
+            - generic [ref=e194]: 05/11 15:55
+          - listitem [ref=e195]:
+            - generic [ref=e196]: 🚜
+            - generic [ref=e197]: 移栽 - 草莓
+            - generic [ref=e198]: 张农艺
+            - generic [ref=e199]: 05/08 15:55

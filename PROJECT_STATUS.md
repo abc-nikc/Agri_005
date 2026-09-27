@@ -21,7 +21,7 @@
 - ✅ 环境变量配置
 
 #### Phase 2: 基础架构 (24/24, 100%)
-- ✅ 数据库配置 (PostgreSQL + TypeORM)
+- ✅ 数据库配置 (MySQL + TypeORM)
 - ✅ InfluxDB 配置
 - ✅ JWT 认证 + RBAC 授权
 - ✅ Express 应用 + 中间件
@@ -151,7 +151,7 @@ nyjc/
 |------|------|----------|------|
 | Node.js | ❌ 未安装 | v18+ | 后端运行环境 |
 | npm | ❌ 未安装 | v9+ | 包管理工具 |
-| PostgreSQL | ❌ 未安装 | v14+ | 关系数据库 |
+| MySQL | ❌ 未安装 | v8.0+ | 关系数据库 |
 | InfluxDB | ❌ 未安装 | v2.7+ | 时序数据库 |
 | Redis | ❌ 未安装 | v6+ | 缓存 (可选) |
 | Docker | ❌ 未安装 | v4+ | 容器化部署 |
@@ -255,11 +255,11 @@ GET    /api/v1/yield/predict
 4. 重启 PowerShell
 5. 验证安装: `node --version` 和 `npm --version`
 
-#### 2. 安装 PostgreSQL
-1. 访问 https://www.postgresql.org/download/windows/
-2. 下载并安装 PostgreSQL 16.x
+#### 2. 安装 MySQL
+1. 访问 https://dev.mysql.com/downloads/installer/
+2. 下载并安装 MySQL 8.0.x
 3. 记住设置的密码
-4. 验证安装: `psql --version`
+4. 验证安装: `mysql --version`
 
 #### 3. 安装依赖
 ```powershell
@@ -274,9 +274,9 @@ npm install
 
 #### 4. 创建数据库
 ```powershell
-psql -U postgres
-CREATE DATABASE farm_management;
-\q
+mysql -u root -p
+CREATE DATABASE farm_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+exit
 ```
 
 #### 5. 运行迁移
@@ -371,7 +371,7 @@ cd d:\Codebuddy\CodeBuddy\nyjc
 
 ## 项目亮点
 
-1. **现代化技术栈**: Vue 3 + TypeScript + Node.js + PostgreSQL
+1. **现代化技术栈**: Vue 3 + TypeScript + Node.js + MySQL
 2. **类型安全**: 前端和后端都使用 TypeScript
 3. **响应式设计**: 使用 Element Plus UI 组件库
 4. **权限控制**: 基于 RBAC 的细粒度权限
@@ -388,7 +388,7 @@ cd d:\Codebuddy\CodeBuddy\nyjc
 
 1. **安装依赖**
    - 安装 Node.js v18+
-   - 安装 PostgreSQL v14+
+   - 安装 MySQL v8.0+
    - (可选) 安装 Docker Desktop
 
 2. **配置环境**
@@ -731,9 +731,9 @@ const deletePlot = async (id: string) => {
 
 **A**: 安装 Node.js 并确保添加到 PATH
 
-### Q2: 无法连接到 PostgreSQL
+### Q2: 无法连接到 MySQL
 
-**A**: 检查 PostgreSQL 服务是否启动，检查 `.env` 配置
+**A**: 检查 MySQL 服务是否启动，检查 `.env` 配置
 
 ### Q3: 端口已被占用
 

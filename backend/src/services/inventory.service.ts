@@ -175,8 +175,22 @@ export class InventoryService {
       itemName: inv.name, systemQuantity: systemQty, actualQuantity: actualQty,
       unit: inv.unit, discrepancy, discrepancyRate: rate, result, remark: data.remark,
     });
+    const saved = await this.stRepo.save(st);
 
-    return await this.stRepo.save(st);
+    // 🟢 盘点异常通知
+    if (result !== '正常') {
+      try {
+        const { NotificationService } = await import('./notification.service');
+        const { Staff } = await import('../models/staff.entity');
+        const notifier = new NotificationService();
+        const admins = await AppDataSource.getRepository(Staff).find({ where: { systemRole: '系统管理员', isActive: true } });
+        for (const admin of admins) {
+          await notifier.sendNotification(admin.id, `盘点异常：${inv.name} ${result}，差额 ${Math.abs(discrepancy)}${inv.unit}（误差 ${(rate * 100).toFixed(1)}%）`, { type: 'warning', link: '/inventory' });
+        }
+      } catch (e) { /* 非阻塞 */ }
+    }
+
+    return saved;
   }
 
   async getStocktakes(filters?: { inventoryId?: string }): Promise<Stocktake[]> {

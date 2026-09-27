@@ -12,6 +12,11 @@ import TraceabilityView from '../views/TraceabilityView.vue';
 import CostManagement from '../views/CostManagement.vue';
 import IoTMonitor from '../views/IoTMonitor.vue';
 import NotificationCenter from '../views/NotificationCenter.vue';
+import AlertManagement from '../views/AlertManagement.vue';
+import AIAssistant from '../views/AIAssistant.vue';
+import BaseMapView from '../views/BaseMapView.vue';
+import FarmTaskView from '../views/FarmTaskView.vue';
+import NewsView from '../views/NewsView.vue';
 import SystemSettingsView from '../views/SystemSettingsView.vue';
 
 const router = createRouter({
@@ -90,6 +95,36 @@ const router = createRouter({
       path: '/iot',
       name: 'IoT',
       component: IoTMonitor,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/alerts',
+      name: 'Alerts',
+      component: AlertManagement,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/ai',
+      name: 'AI',
+      component: AIAssistant,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/news',
+      name: 'News',
+      component: NewsView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/base-map',
+      name: 'BaseMap',
+      component: BaseMapView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/farm-tasks',
+      name: 'FarmTasks',
+      component: FarmTaskView,
       meta: { requiresAuth: true },
     },
     {

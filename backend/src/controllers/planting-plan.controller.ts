@@ -60,6 +60,7 @@ export const getTermRecommendations = [
   authenticate, authorize(['系统管理员', '农艺师', '操作员']),
   async (_req: Request, res: Response) => {
     const result = service.getCurrentTermRecommendations();
+    console.log('[DEBUG] SolarTerm:', result, 'Date:', new Date().toISOString());
     res.json({ data: result });
   },
 ];

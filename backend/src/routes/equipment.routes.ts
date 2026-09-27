@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { equipmentController } from '../controllers/equipment.controller';
 import { authenticate } from '../middlewares/authenticate';
 import { authorize } from '../middlewares/authorize';
-import { validateRequest } from '../middlewares/validation.middleware';
 
 const router = Router();
 
@@ -19,7 +18,7 @@ router.get(
 // 获取维护提醒（必须在 :id 之前）
 router.get(
   '/maintenance-alerts',
-  authorize(['系统管理员', '农艺师', '操作员']),
+  authorize(['系统管理员', '农艺师', '操作员', '只读观察者']),
   equipmentController.getMaintenanceAlerts.bind(equipmentController)
 );
 
@@ -34,7 +33,6 @@ router.get(
 router.post(
   '/',
   authorize(['系统管理员', '农艺师']),
-  validateRequest,
   equipmentController.createEquipment.bind(equipmentController)
 );
 
@@ -42,7 +40,6 @@ router.post(
 router.put(
   '/:id',
   authorize(['系统管理员', '农艺师']),
-  validateRequest,
   equipmentController.updateEquipment.bind(equipmentController)
 );
 

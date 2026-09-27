@@ -4,7 +4,6 @@ import { BaseEntity } from './base.entity';
 @Entity('production_batches')
 export class ProductionBatch extends BaseEntity {
   @Column({ name: 'batch_number', length: 100, unique: true })
-  @Index()
   batchNumber!: string;
 
   @Column({ name: 'plot_id', length: 36 })
@@ -26,7 +25,7 @@ export class ProductionBatch extends BaseEntity {
   @Column({ name: 'estimated_harvest_date', type: 'date' })
   estimatedHarvestDate!: string;
 
-  @Column({ name: 'status', type: 'enum', enum: ['进行中', '已完成'] })
+  @Column({ name: 'status', type: 'varchar', length: 20 })
   @Index()
   status!: string;
 

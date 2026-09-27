@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, Errback } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { QueryFailedError, EntityNotFoundError } from 'typeorm';
 
 /**
@@ -9,7 +9,7 @@ export const errorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // 记录错误日志
   console.error('[ERROR]', {
@@ -73,7 +73,7 @@ export const errorHandler = (
   const statusCode = err.statusCode || 500;
   const message = statusCode === 500 ? '服务器内部错误' : err.message;
 
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     error: message,
     code: err.code || 'INTERNAL_SERVER_ERROR',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),

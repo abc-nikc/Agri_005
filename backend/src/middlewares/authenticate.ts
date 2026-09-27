@@ -23,7 +23,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key') as any;
     req.user = { id: decoded.id, username: decoded.username, role: decoded.role, division: decoded.division };
-    next();
+    return next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) return res.status(401).json({ error: '令牌已过期', code: 'TOKEN_EXPIRED' });
     if (error instanceof jwt.JsonWebTokenError) return res.status(401).json({ error: '无效令牌', code: 'TOKEN_INVALID' });

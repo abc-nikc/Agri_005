@@ -1,23 +1,23 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1';
 
 export interface LoginResult {
   accessToken: string;
-  refreshToken: string;
   user: {
     id: string;
     username: string;
-    role: string;
+    systemRole: string;
   };
 }
 
 export const login = async (username: string, password: string): Promise<LoginResult> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
-      username,
-      password,
-    });
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/login`,
+      { username, password },
+      { withCredentials: true }
+    );
 
     return response.data;
   } catch (error) {
@@ -45,11 +45,13 @@ export const logout = async (): Promise<void> => {
   }
 };
 
-export const refreshToken = async (refreshToken: string): Promise<string> => {
+export const refreshToken = async (): Promise<string> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-      refreshToken,
-    });
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/refresh`,
+      {},
+      { withCredentials: true }
+    );
 
     return response.data.accessToken;
   } catch (error) {

@@ -1,0 +1,27 @@
+- main [ref=e4]:
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - img [ref=e13]:
+        - generic [ref=e15]: 🌾
+      - heading "农场管家系统" [level=1] [ref=e16]
+      - paragraph [ref=e17]: 智能化农场管理平台
+    - generic [ref=e20]: 欢迎登录
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - img [ref=e26]
+          - text: 用户名
+        - textbox "请输入用户名" [ref=e29]
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - img [ref=e33]
+          - text: 密码
+        - generic [ref=e36]:
+          - textbox "请输入密码" [ref=e37]
+          - button [ref=e38] [cursor=pointer]:
+            - img [ref=e40]
+      - button "立即登录" [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]:
+          - img [ref=e46]
+          - text: 立即登录
+    - generic [ref=e49]: "默认账号: admin / admin123"

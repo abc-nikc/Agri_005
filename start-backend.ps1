@@ -48,7 +48,7 @@ if (-not (Test-Path $envFile)) {
     if (Test-Path $envExample) {
         Copy-Item $envExample $envFile
         Write-Host "✓ 已创建 .env 文件，请编辑它以配置您的环境" -ForegroundColor Green
-        Write-Host "  重要: 请修改 DATABASE_URL 和 DB_PASSWORD 为您的数据库密码" -ForegroundColor Cyan
+        Write-Host "  重要: 请修改 DB_USER 和 DB_PASSWORD 为您的 MySQL 账号密码" -ForegroundColor Cyan
     } else {
         Write-Host "✗ .env.example 文件不存在，无法创建 .env 文件" -ForegroundColor Red
     }
@@ -71,9 +71,9 @@ if (-not (Test-Path $nodeModulesPath)) {
 
 # 检查数据库是否可连接
 Write-Host "检查数据库连接..." -ForegroundColor Yellow
-Write-Host "确保 PostgreSQL 服务正在运行" -ForegroundColor Cyan
+Write-Host "确保 MySQL 服务正在运行" -ForegroundColor Cyan
 Write-Host "如果连接失败，请检查:" -ForegroundColor Cyan
-Write-Host "  1. PostgreSQL 服务是否启动" -ForegroundColor Cyan
+Write-Host "  1. MySQL 服务是否启动（默认端口 3306）" -ForegroundColor Cyan
 Write-Host "  2. .env 文件中的数据库配置是否正确" -ForegroundColor Cyan
 Write-Host "  3. 数据库 farm_management 是否已创建" -ForegroundColor Cyan
 

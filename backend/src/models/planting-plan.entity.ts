@@ -1,4 +1,4 @@
-import { Entity, Column, Index } from 'typeorm';
+﻿import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 
 @Entity('planting_plans')
@@ -22,7 +22,7 @@ export class PlantingPlan extends BaseEntity {
   @Column({ name: 'planned_harvest_date', type: 'date' })
   plannedHarvestDate!: string;
 
-  @Column({ name: 'status', type: 'enum', enum: ['待执行', '执行中', '已完成', '已调整'] })
+  @Column({ name: 'status', type: 'varchar', length: 20 })
   @Index()
   status!: string;
 
@@ -35,7 +35,7 @@ export class PlantingPlan extends BaseEntity {
   @Column({ name: 'adjust_reason', type: 'text', nullable: true })
   adjustReason?: string;
 
-  @Column({ name: 'adjust_date', type: 'timestamp', nullable: true })
+  @Column({ name: 'adjust_date', type: 'datetime', nullable: true })
   adjustDate?: Date;
 
   @Column({ name: 'batch_id', length: 36, nullable: true })

@@ -1,31 +1,33 @@
-# 农场管家系统 - Docker Compose 配置
+# 智慧农业物联网监控平台(农场管家系统) - Docker Compose 配置
 # 使用方法:
-# 1. 安装 Docker Desktop: https://www.docker.com/products/docker-desktop/
-# 2. 在项目根目录运行: docker-compose up -d
+# 1. 安装 Docker Desktop
+# 2. 运行: docker-compose up -d
 # 3. 访问 http://localhost:5173 查看前端
-# 4. 访问 http://localhost:3000 查看后端 API
+# 4. 访问 http://localhost:3001 查看后端 API
 
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库
-  postgres:
-    image: postgres:16-alpine
-    container_name: farm-postgres
+  # MySQL 8.0 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: farm-mysql
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: farm_management
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: farm_management
+      MYSQL_USER: farm_user
+      MYSQL_PASSWORD: farm_password
+      TZ: Asia/Shanghai
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - mysql_data:/var/lib/mysql
+      - ./scripts/setup-db.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - farm-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -87,7 +89,7 @@ services:
     networks:
       - farm-network
 
-  # 后端服务
+  # 后端服务 (Express + TypeScript)
   backend:
     build:
       context: ./backend
@@ -97,30 +99,28 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/farm_management
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: password
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: farm_user
+      DB_PASSWORD: farm_password
       DB_NAME: farm_management
+      DB_SYNCHRONIZE: "true"
       INFLUX_URL: http://influxdb:8086
       INFLUX_TOKEN: farm-management-token-2024
       INFLUX_ORG: farm-org
       INFLUX_BUCKET: farm_management
+      REDIS_URL: redis://redis:6379
       MQTT_BROKER_URL: mqtt://mqtt:1883
-      MQTT_USERNAME: guest
-      MQTT_PASSWORD: guest
       JWT_SECRET: farm-management-super-secret-jwt-key-production
       JWT_ACCESS_TOKEN_EXPIRY: 2h
       REFRESH_TOKEN_SECRET: farm-management-super-secret-refresh-key-production
       REFRESH_TOKEN_EXPIRY: 7d
-      REDIS_URL: redis://redis:6379
       CORS_ORIGIN: http://localhost:5173
-      LOG_LEVEL: info
+      ZHIPU_API_KEY: ${ZHIPU_API_KEY:-}
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
       influxdb:
         condition: service_healthy
@@ -128,10 +128,8 @@ services:
         condition: service_healthy
     networks:
       - farm-network
-    volumes:
-      - ./backend/logs:/app/logs
 
-  # 前端服务 (开发模式)
+  # 前端服务 (Vue 3 + Vite)
   frontend:
     build:
       context: ./frontend
@@ -139,34 +137,16 @@ services:
     container_name: farm-frontend
     restart: unless-stopped
     environment:
-      VITE_API_BASE_URL: http://localhost:3000/api/v1
-      VITE_APP_TITLE: 农场管家系统
+      VITE_API_BASE_URL: http://localhost:3001/api/v1
     ports:
       - "5173:5173"
     depends_on:
       - backend
     networks:
       - farm-network
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-
-  # 数据库管理工具 (可选)
-  adminer:
-    image: adminer:latest
-    container_name: farm-adminer
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-    depends_on:
-      - postgres
-    networks:
-      - farm-network
 
 volumes:
-  postgres_data:
+  mysql_data:
   influxdb_data:
   redis_data:
   mqtt_data:

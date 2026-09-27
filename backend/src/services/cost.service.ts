@@ -135,8 +135,6 @@ export class CostService {
     const batches = await this.batchRepo.find({ where: { varietyName, status: '已完成' } });
     if (batches.length === 0) return { prediction: null, message: '该品种暂无历史数据' };
 
-    const yields = batches.map(b => Number(b.area || 0) > 0 ? 0 : 0);
-
     // 从采收记录取实际产量
     const { FarmingOperation } = await import('../models/farming-operation.entity');
     const opRepo = AppDataSource.getRepository(FarmingOperation);
@@ -146,8 +144,16 @@ export class CostService {
     const batchYields: any[] = [];
 
     for (const batch of batches) {
-      const harvests = await opRepo.find({ where: { operationType: '采收' }, order: { operationDate: 'DESC' } });
-      const batchYield = harvests.filter(h => h.varietyName === varietyName).reduce((s, h) => s + Number(h.harvestYield || 0), 0);
+      // 优先按 batchId 查，兜底按品种名+地块查
+      let harvests: any[] = [];
+      if (batch.id) {
+        harvests = await opRepo.find({ where: { batchId: batch.id, operationType: '采收' } } as any);
+      }
+      if (harvests.length === 0) {
+        const allHarvests = await opRepo.find({ where: { operationType: '采收' }, order: { operationDate: 'DESC' } } as any);
+        harvests = allHarvests.filter(h => h.varietyName === varietyName || h.plotId === batch.plotId);
+      }
+      const batchYield = harvests.reduce((s, h) => s + Number(h.harvestYield || 0), 0);
       batchYields.push({ batchNumber: batch.batchNumber, yield: batchYield, area: Number(batch.area) });
       totalYield += batchYield;
       totalArea += Number(batch.area || 0);
@@ -175,15 +181,26 @@ export class CostService {
       take: 20,
     });
 
+    if (batches.length === 0) return { items: [], best: null, count: 0 };
+
     const { FarmingOperation } = await import('../models/farming-operation.entity');
     const opRepo = AppDataSource.getRepository(FarmingOperation);
 
+    // 一次性取所有相关数据，避免 N+1 查询
+    const allCosts = await this.costRepo.find();
+    const allHarvests = await opRepo.find({ where: { operationType: '采收' } } as any);
+
     const result = [];
     for (const b of batches) {
-      const [costs, harvests] = await Promise.all([
-        this.costRepo.find({ where: { batchId: b.id } }),
-        opRepo.find({ where: { batchId: b.id, operationType: '采收' } }),
-      ]);
+      // 优先按 batchId 匹配，兜底按地块/品种匹配
+      let costs = allCosts.filter(c => c.batchId === b.id);
+      if (costs.length === 0) {
+        costs = allCosts.filter(c => c.description?.includes(varietyName));
+      }
+      let harvests = allHarvests.filter(h => h.batchId === b.id);
+      if (harvests.length === 0) {
+        harvests = allHarvests.filter(h => h.varietyName === varietyName || h.plotId === b.plotId);
+      }
 
       const totalCost = costs.reduce((s, c) => s + Number(c.amount), 0);
       const totalYield = harvests.reduce((s, h) => s + Number(h.harvestYield || 0), 0);
@@ -214,8 +231,8 @@ export class CostService {
 
     // 按效率排序（每公斤成本越低越好）并标记最佳
     const sorted = [...result].sort((a, b) => a.efficiency - b.efficiency);
-    const best = sorted[0];
-    if (best && best.efficiency > 0) {
+    const best = sorted.find(s => s.efficiency > 0) || sorted[0];
+    if (best) {
       result.forEach(r => { (r as any).isBest = r.batchNumber === best.batchNumber; });
     }
 

@@ -17,6 +17,10 @@ import { publicTrace } from '../controllers/traceability.controller';
 import costRoutes from './cost.routes';
 import sensorRoutes from './sensor.routes';
 import systemSettingsRoutes from './system-settings.routes';
+import sseRoutes from './sse.routes';
+import aiRoutes from './ai.routes';
+import farmTaskRoutes from './farm-task.routes';
+import newsRoutes from './news.routes';
 
 const router = Router();
 
@@ -37,6 +41,10 @@ protectedRouter.use('/costs', costRoutes);
 protectedRouter.use('/iot', sensorRoutes);
 protectedRouter.use('/notifications', notificationRoutes);
 protectedRouter.use('/settings', systemSettingsRoutes);
+protectedRouter.use('/sse', sseRoutes);
+protectedRouter.use('/ai', aiRoutes);
+protectedRouter.use('/farm-tasks', farmTaskRoutes);
+protectedRouter.use('/news', newsRoutes);
 
 router.use('/', protectedRouter);
 router.get('/api/v1/trace/:code', publicTrace);

@@ -10,19 +10,23 @@ export class VarietyService {
   }
 
   /**
-   * 获取所有品种
+   * 获取所有品种（支持搜索和分类筛选）
    */
-  async findAll(includeInactive: boolean = false): Promise<Variety[]> {
-    const where: any = {};
-    
+  async findAll(options: { includeInactive?: boolean; search?: string; category?: string } = {}): Promise<Variety[]> {
+    const { includeInactive = false, search, category } = options;
+    const qb = this.varietyRepository.createQueryBuilder('variety');
+
     if (!includeInactive) {
-      where.isActive = true;
+      qb.andWhere('variety.is_active = :isActive', { isActive: true });
+    }
+    if (search) {
+      qb.andWhere('variety.name LIKE :search', { search: `%${search}%` });
+    }
+    if (category) {
+      qb.andWhere('variety.category = :category', { category });
     }
 
-    return await this.varietyRepository.find({
-      where,
-      order: { name: 'ASC' },
-    });
+    return await qb.orderBy('variety.name', 'ASC').getMany();
   }
 
   /**
@@ -145,13 +149,12 @@ export class VarietyService {
    * @param season 季节（如 "春季", "秋季"）
    */
   async getRecommendationsBySeason(season: string): Promise<Variety[]> {
-    // 注意：sowingSeason 是 JSONB 字段，存储为数组
-    // 需要使用 TypeORM 的 QueryBuilder 进行查询
+    // SQLite 兼容：sowingSeason 为 simple-json TEXT，用 LIKE 查询
     const queryBuilder = this.varietyRepository
       .createQueryBuilder('variety')
       .where('variety.is_active = :isActive', { isActive: true })
-      .andWhere('variety.sowing_season::jsonb @> :season', {
-        season: JSON.stringify([season]),
+      .andWhere('variety.sowing_season LIKE :season', {
+        season: `%${season}%`,
       });
 
     return await queryBuilder.getMany();

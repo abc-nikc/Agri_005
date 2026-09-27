@@ -6,10 +6,10 @@ export class Equipment extends BaseEntity {
   @Column({ name: 'equipment_number', length: 50, unique: true })
   equipmentNumber!: string;
 
-  @Column({ name: 'type', type: 'enum', enum: ['农机具', '灌溉设备', '物联网设备'] })
+  @Column({ name: 'type', type: 'varchar', length: 50 })
   type!: string;
 
-  @Column({ name: 'status', type: 'enum', enum: ['正常', '维护中', '故障'] })
+  @Column({ name: 'status', type: 'varchar', length: 20 })
   @Index()
   status!: string;
 

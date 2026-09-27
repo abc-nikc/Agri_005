@@ -15,8 +15,12 @@ export const getAllVarieties = [
   authorize(['系统管理员', '农艺师', '操作员', '只读观察者']),
   async (req: Request, res: Response) => {
     try {
-      const includeInactive = req.query.includeInactive === 'true';
-      const varieties = await varietyService.findAll(includeInactive);
+      const { search, category, includeInactive } = req.query as any;
+      const varieties = await varietyService.findAll({
+        includeInactive: includeInactive === 'true',
+        search: search as string,
+        category: category as string,
+      });
       res.json({ data: varieties });
     } catch (error: any) {
       res.status(500).json({

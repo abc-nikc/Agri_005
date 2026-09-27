@@ -3,7 +3,9 @@ import { AppDataSource } from '../config/database';
 import { FarmingOperation, OperationType } from '../models/farming-operation.entity';
 import { Plot } from '../models/plot.entity';
 import { Variety } from '../models/variety.entity';
+import { Staff } from '../models/staff.entity';
 import { systemSettingsService } from './system-settings.service';
+import { NotificationService } from './notification.service';
 
 interface CreateOperationDto {
   operationType: OperationType;
@@ -98,8 +100,23 @@ export class FarmingOperationService {
         : new Date(data.operationDate);
     }
 
-    const operation = this.repo.create(operationData);
-    const saved = await this.repo.save(operation);
+    const operation = this.repo.create(operationData as any);
+    const saved = await this.repo.save(operation) as unknown as FarmingOperation;
+
+    // 🟢 通知管理员关键操作
+    try {
+      const notifier = new NotificationService();
+      const admins = await AppDataSource.getRepository(Staff).find({ where: { systemRole: '系统管理员', isActive: true } });
+      for (const admin of admins) {
+        if (data.operationType === '采收') {
+          await notifier.sendNotification(admin.id, `${plot.plotNumber} ${operationData.varietyName || ''} 采收完成：${data.harvestYield || '已采收'}${data.yieldUnit || ''}（${data.qualityGrade || '未分级'}）→ ${data.harvestDestination || '未指定去向'}`, { type: 'harvest', link: '/farming-operations' });
+        } else if (data.operationType === '播种') {
+          await notifier.sendNotification(admin.id, `${plot.plotNumber} ${operationData.varietyName || ''} 已播种，面积 ${data.area || '未知'}亩`, { type: 'info', link: '/farming-operations' });
+        } else if (data.operationType === '打药') {
+          await notifier.sendNotification(admin.id, `${plot.plotNumber} ${operationData.varietyName || ''} 施用农药 ${data.pesticideName || ''} ${data.pesticideAmount || ''}${data.pesticideUnit || ''}`, { type: 'warning', link: '/farming-operations' });
+        }
+      }
+    } catch (e) { /* 非阻塞 */ }
 
     // 6. 采收后自动释放地块 + 更新地块状态
     if (data.operationType === '采收') {

@@ -1,4 +1,4 @@
-import { Entity, Column, Index } from 'typeorm';
+﻿import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 
 export type OperationType = '播种' | '移栽' | '施肥' | '打药' | '灌溉' | '排水' | '除草' | '整枝' | '采收';
@@ -84,7 +84,7 @@ export class FarmingOperation extends BaseEntity {
   @Column({ name: 'operator_name', length: 100 })
   operatorName!: string;
 
-  @Column({ name: 'operation_date', type: 'timestamp' })
+  @Column({ name: 'operation_date', type: 'datetime' })
   @Index()
   operationDate!: Date;
 
@@ -104,6 +104,6 @@ export class FarmingOperation extends BaseEntity {
   @Column({ name: 'is_supplemental', default: false })
   isSupplemental!: boolean;
 
-  @Column({ name: 'supplemental_operation_date', type: 'timestamp', nullable: true })
+  @Column({ name: 'supplemental_operation_date', type: 'datetime', nullable: true })
   supplementalOperationDate?: Date;
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, Index, BeforeInsert } from 'typeorm';
+﻿import { Entity, Column, Index, BeforeInsert } from 'typeorm';
 import { hashPassword } from '../utils/password';
 import { BaseEntity } from './base.entity';
 
@@ -8,17 +8,12 @@ export class Staff extends BaseEntity {
   name!: string;
 
   @Column({ name: 'username', length: 50, unique: true })
-  @Index()
   username!: string;
 
   @Column({ name: 'password_hash', length: 255 })
   passwordHash!: string;
 
-  @Column({
-    name: 'system_role',
-    type: 'enum',
-    enum: ['系统管理员', '农艺师', '操作员', '只读观察者'],
-  })
+  @Column({ name: 'system_role', type: 'varchar', length: 50 })
   @Index()
   systemRole!: string;
 
@@ -34,7 +29,7 @@ export class Staff extends BaseEntity {
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;
 
-  @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'last_login_at', type: 'datetime', nullable: true })
   lastLoginAt?: Date;
 
   // 保存前自动哈希密码

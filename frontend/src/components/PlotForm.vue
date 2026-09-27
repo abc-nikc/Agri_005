@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { Plot, PlotFormData } from '../types/plot';
 
 const props = defineProps<{
@@ -67,17 +67,18 @@ const formData = ref<PlotFormData>({
   status: '闲置',
 });
 
-onMounted(() => {
-  if (props.plot) {
+// 使用 watch 替代 onMounted，确保编辑时数据正确填充
+watch(() => props.plot, (newPlot) => {
+  if (newPlot) {
     formData.value = {
-      plotNumber: props.plot.plotNumber,
-      area: props.plot.area,
-      soilType: props.plot.soilType || '',
-      region: props.plot.region,
-      status: props.plot.status,
+      plotNumber: newPlot.plotNumber,
+      area: newPlot.area,
+      soilType: newPlot.soilType || '',
+      region: newPlot.region,
+      status: newPlot.status,
     };
   }
-});
+}, { immediate: true });
 
 const handleSubmit = async () => {
   isSubmitting.value = true;

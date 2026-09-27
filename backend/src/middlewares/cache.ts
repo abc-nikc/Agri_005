@@ -29,6 +29,6 @@ export function cacheMiddleware(prefix: string, ttl: number = 300) {
       return originalJson(body);
     };
     res.setHeader('X-Cache', 'MISS');
-    next();
+    return next();
   };
 }

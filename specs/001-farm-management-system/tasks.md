@@ -19,7 +19,7 @@
 - [X] T003 [P] Initialize frontend Vue 3 project with TypeScript (Vite, package.json)
 - [X] T004 [P] Configure ESLint and Prettier for backend
 - [X] T005 [P] Configure ESLint and Prettier for frontend
-- [X] T006 Configure Docker Compose for PostgreSQL, InfluxDB, EMQX, Redis
+- [X] T006 Configure Docker Compose for MySQL, InfluxDB, EMQX, Redis
 - [X] T007 [P] Create backend .env.example with all required environment variables
 - [X] T008 [P] Create frontend .env.example with VITE_API_BASE_URL
 
@@ -35,8 +35,8 @@
 
 ### 2.1 Database & ORM Setup
 
-- [X] T009 [P] Install and configure TypeORM in backend (typeorm, pg driver)
-- [X] T010 [P] Create PostgreSQL database and user (scripts/setup-db.sql)
+- [X] T009 [P] Install and configure TypeORM in backend (typeorm, mysql2 driver)
+- [X] T010 [P] Create MySQL database and user (scripts/setup-db.sql)
 - [X] T011 [P] Configure InfluxDB connection and bucket (src/config/influxdb.ts)
 - [X] T012 Create database migration framework (src/migrations/)
 - [X] T013 [P] Create base entity class with common fields (id, created_at, updated_at)
@@ -144,7 +144,7 @@
 
 ### 4.1 Models & Database
 
-- [X] T068 [US2] Create FarmingOperation entity (src/models/farming-operation.entity.ts) with fields: id, operation_type, batch_id, plot_id, operator_id, operation_date, operation_time, details (JSONB), weather_condition, is_supplemental
+- [X] T068 [US2] Create FarmingOperation entity (src/models/farming-operation.entity.ts) with fields: id, operation_type, batch_id, plot_id, operator_id, operation_date, operation_time, details (JSON), weather_condition, is_supplemental
 - [X] T069 [US2] Create ProductionBatch entity (src/models/production-batch.entity.ts) with fields: id, batch_number, plot_id, variety_id, sowing_date, expected_harvest_date, status, traceability_code
 - [X] T070 [US2] Create database migrations for FarmingOperation and ProductionBatch tables
 - [X] T071 [US2] Create database index on farming_operations(batch_id, operation_type)
@@ -297,7 +297,7 @@
 
 ### 7.1 Models & Database
 
-- [ ] T124 [US5] Create TraceabilityRecord entity (src/models/traceability-record.entity.ts) with fields: id, batch_id, traceability_code, seed_source, farming_operations_summary (JSONB), input_usage_summary (JSONB), environment_data_summary (JSONB), harvest_info (JSONB), sales_info (JSONB)
+- [ ] T124 [US5] Create TraceabilityRecord entity (src/models/traceability-record.entity.ts) with fields: id, batch_id, traceability_code, seed_source, farming_operations_summary (JSON), input_usage_summary (JSON), environment_data_summary (JSON), harvest_info (JSON), sales_info (JSON)
 - [ ] T125 [US5] Create database migration for TraceabilityRecord table
 - [ ] T126 [US5] Create index on traceability_records(traceability_code)
 

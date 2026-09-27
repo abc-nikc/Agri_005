@@ -1,0 +1,150 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]:
+        - generic [ref=e9]: 🌾
+      - generic [ref=e10]:
+        - generic [ref=e11]: 农场管家
+        - generic [ref=e12]: Smart Farm
+    - navigation [ref=e13]:
+      - generic [ref=e14]: 主菜单
+      - link "仪表盘" [ref=e15] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e18]
+        - generic [ref=e20]: 仪表盘
+      - generic [ref=e22]: 业务管理
+      - link "地块管理" [ref=e23] [cursor=pointer]:
+        - /url: /plots
+        - img [ref=e26]
+        - generic [ref=e29]: 地块管理
+      - link "品种管理" [ref=e30] [cursor=pointer]:
+        - /url: /varieties
+        - img [ref=e33]
+        - generic [ref=e35]: 品种管理
+      - link "员工管理" [ref=e36] [cursor=pointer]:
+        - /url: /staff
+        - img [ref=e39]
+        - generic [ref=e41]: 员工管理
+      - link "设备管理" [ref=e42] [cursor=pointer]:
+        - /url: /equipment
+        - img [ref=e45]
+        - generic [ref=e47]: 设备管理
+      - link "农事操作" [ref=e48] [cursor=pointer]:
+        - /url: /farming-operations
+        - img [ref=e51]
+        - generic [ref=e54]: 农事操作
+      - generic [ref=e55]: 生产运营
+      - link "种植计划" [ref=e56] [cursor=pointer]:
+        - /url: /planting-plans
+        - img [ref=e59]
+        - generic [ref=e61]: 种植计划
+      - link "库存管理" [ref=e62] [cursor=pointer]:
+        - /url: /inventory
+        - img [ref=e65]
+        - generic [ref=e69]: 库存管理
+      - link "质量追溯" [ref=e70] [cursor=pointer]:
+        - /url: /traceability
+        - img [ref=e73]
+        - generic [ref=e75]: 质量追溯
+      - link "成本核算" [ref=e76] [cursor=pointer]:
+        - /url: /costs
+        - img [ref=e79]
+        - generic [ref=e83]: 成本核算
+      - generic [ref=e84]: 监控 & 系统
+      - link "IoT监控" [ref=e85] [cursor=pointer]:
+        - /url: /iot
+        - img [ref=e88]
+        - generic [ref=e91]: IoT监控
+      - link "预警管理" [ref=e92] [cursor=pointer]:
+        - /url: /alerts
+        - img [ref=e95]
+        - generic [ref=e98]: 预警管理
+      - link "消息通知 34" [ref=e99] [cursor=pointer]:
+        - /url: /notifications
+        - img [ref=e102]
+        - generic [ref=e106]: 消息通知
+        - generic [ref=e107]: "34"
+      - link "系统设置" [ref=e109] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e112]
+        - generic [ref=e114]: 系统设置
+    - generic [ref=e115]:
+      - generic [ref=e116]:
+        - generic [ref=e118]: 管
+        - generic [ref=e119]:
+          - generic [ref=e120]: 管理员
+          - generic [ref=e121]: 系统管理员
+      - button "退出登录" [ref=e122] [cursor=pointer]:
+        - img [ref=e124]
+        - generic [ref=e127]: 退出登录
+  - main [ref=e128]:
+    - generic [ref=e129]:
+      - generic [ref=e130]:
+        - generic [ref=e131]:
+          - heading "IoT 物联网监控中心" [level=2] [ref=e132]:
+            - img [ref=e134]
+            - text: IoT 物联网监控中心
+          - paragraph [ref=e137]: 实时采集 · 智能预警 · 远程控制
+        - generic [ref=e138]:
+          - generic [ref=e141]: 实时监控中
+          - generic:
+            - generic: MQTT 离线
+          - generic [ref=e142]:
+            - switch [checked]
+            - generic [ref=e146] [cursor=pointer]: 自动刷新
+      - generic [ref=e147]:
+        - generic [ref=e148]: 正常
+        - generic [ref=e150]: 超出正常范围
+        - generic [ref=e152]: 超出量程（严重）
+        - generic [ref=e154]: 离线/死值
+        - generic [ref=e156]: "刷新间隔: 10秒"
+      - generic [ref=e157]:
+        - generic [ref=e159] [cursor=pointer]:
+          - generic:
+            - combobox [ref=e161]
+            - generic [ref=e162]: 全部地块
+          - img [ref=e165]
+        - generic [ref=e168] [cursor=pointer]:
+          - generic:
+            - combobox [ref=e170]
+            - generic [ref=e171]: 全部传感器
+          - img [ref=e174]
+        - button "立即刷新" [disabled]:
+          - generic:
+            - img
+          - generic: 立即刷新
+        - generic [ref=e176]: "最后更新: --:--:--"
+      - heading "实时环境数据" [level=3] [ref=e177]
+      - generic [ref=e179]:
+        - img [ref=e181]
+        - paragraph [ref=e198]: 暂无传感器数据
+      - heading "设备远程控制" [level=3] [ref=e199]
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - generic [ref=e204]: 地块
+          - generic [ref=e207] [cursor=pointer]:
+            - generic:
+              - combobox "地块" [ref=e209]
+              - generic [ref=e210]: 选择地块
+            - img [ref=e213]
+        - generic [ref=e215]:
+          - generic [ref=e216]: 设备
+          - generic [ref=e219] [cursor=pointer]:
+            - generic:
+              - combobox "设备" [ref=e221]
+              - generic [ref=e222]: 选择设备
+            - img [ref=e225]
+        - generic [ref=e227]:
+          - generic [ref=e228]: 指令
+          - generic [ref=e231] [cursor=pointer]:
+            - generic:
+              - combobox "指令" [ref=e233]
+              - generic [ref=e234]: 开启灌溉
+            - img [ref=e237]
+        - button "发送指令" [ref=e241] [cursor=pointer]:
+          - img [ref=e243]
+          - generic [ref=e245]: 发送指令
+      - heading "传感器历史数据" [level=3] [ref=e246]
+      - generic [ref=e249]:
+        - img [ref=e251]
+        - paragraph [ref=e268]: 暂无历史数据

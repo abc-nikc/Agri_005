@@ -8,14 +8,17 @@ WORKDIR /app
 # 复制 package.json 和 package-lock.json
 COPY package*.json ./
 
-# 安装依赖
-RUN npm ci --only=production
+# 安装完整依赖（构建 TypeScript 需要开发依赖）
+RUN npm ci
 
 # 复制源代码
 COPY . .
 
 # 编译 TypeScript
 RUN npm run build
+
+# 构建完成后移除开发依赖
+RUN npm prune --omit=dev
 
 # 生产阶段
 FROM node:20-alpine

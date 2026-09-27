@@ -3,6 +3,8 @@ import { AppDataSource } from '../config/database';
 import { ProductionBatch } from '../models/production-batch.entity';
 import { PlantingPlan } from '../models/planting-plan.entity';
 import { Plot } from '../models/plot.entity';
+import { NotificationService } from './notification.service';
+import { Staff } from '../models/staff.entity';
 
 export class ProductionBatchService {
   private repo: Repository<ProductionBatch>;
@@ -133,6 +135,15 @@ export class ProductionBatchService {
     batch.status = '已完成';
     batch.actualHarvestDate = actualHarvestDate;
     const saved = await this.repo.save(batch);
+
+    // 🟢 通知管理员批次完成
+    try {
+      const notifier = new NotificationService();
+      const admins = await AppDataSource.getRepository(Staff).find({ where: { systemRole: '系统管理员', isActive: true } });
+      for (const admin of admins) {
+        await notifier.sendNotification(admin.id, `批次 ${batch.batchNumber} 已完成采收（${batch.varietyName}，${actualHarvestDate}），请安排入库`, { type: 'success', link: '/planting-plans' });
+      }
+    } catch (e) { /* 非阻塞 */ }
 
     // 更新关联计划
     if (batch.planId) {

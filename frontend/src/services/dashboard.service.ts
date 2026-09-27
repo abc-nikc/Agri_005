@@ -1,116 +1,111 @@
-import axios from 'axios';
+import { apiClient } from './api-client';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-
-// 创建 axios 实例
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// 请求拦截器：自动附加 JWT token
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// 响应拦截器：处理 token 过期
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401 && !error.config._retry) {
-      error.config._retry = true;
-      
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
-          
-          const { accessToken } = response.data;
-          localStorage.setItem('access_token', accessToken);
-          
-          error.config.headers.Authorization = `Bearer ${accessToken}`;
-          return apiClient(error.config);
-        } catch (refreshError) {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
-        }
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
-// 仪表盘指标接口
 export interface DashboardMetrics {
-  totalArea: number;
-  plantedArea: number;
-  idleArea: number;
-  varietyCount: number;
-  staffCount: number;
-  plotCount: number;
-  activeStaffCount: number;
+  totalArea: number; plantedArea: number; idleArea: number;
+  varietyCount: number; staffCount: number; plotCount: number;
+  activeStaffCount: number; equipmentCount: number; batchCount: number;
 }
 
-// 分布项接口
 export interface DistributionItem {
-  status?: string;
-  category?: string;
-  count: number;
+  status?: string; category?: string; count: number; area?: number;
+}
+
+export interface Activity {
+  id: string; action: string; user: string; timestamp: string; source?: string;
+}
+
+export interface EquipmentItem {
+  id: string; equipmentNumber: string; type: string; status: string;
+  associatedPlotId?: string; nextMaintenanceDate?: string; mqttTopic?: string;
+  associatedPlotNumber?: string;
+}
+
+export interface PlotItem {
+  id: string; plotNumber: string; area: number; status: string;
+  currentVarietyId?: string; soilType?: string; region?: string;
+  currentVarietyName?: string;
+}
+
+export interface BatchItem {
+  id: string; batchNumber: string; status: string;
+  varietyName?: string; plotNumber?: string;
+  plannedStartDate?: string; plannedEndDate?: string;
+  actualStartDate?: string; actualEndDate?: string;
   area?: number;
 }
 
-// 活动记录接口
-export interface Activity {
-  id: string;
-  action: string;
-  user: string;
-  timestamp: string;
+export interface OperationItem {
+  id: string; operationType: string; plotName?: string; varietyName?: string;
+  operatorName?: string; operationDate: string;
 }
 
-/**
- * 获取仪表盘关键指标
- * GET /api/v1/dashboard/metrics
- */
+// ===== 原有接口 =====
 export const getDashboardMetrics = async (): Promise<DashboardMetrics> => {
-  const response = await apiClient.get('/dashboard/metrics');
-  return response.data.data;
+  const r = await apiClient.get('/dashboard/metrics');
+  return r.data.data;
 };
 
-/**
- * 获取地块状态分布
- * GET /api/v1/dashboard/plot-status
- */
 export const getPlotStatusDistribution = async (): Promise<DistributionItem[]> => {
-  const response = await apiClient.get('/dashboard/plot-status');
-  return response.data.data;
+  const r = await apiClient.get('/dashboard/plot-status');
+  return r.data.data;
 };
 
-/**
- * 获取品种类别分布
- * GET /api/v1/dashboard/variety-categories
- */
 export const getVarietyCategoryDistribution = async (): Promise<DistributionItem[]> => {
-  const response = await apiClient.get('/dashboard/variety-categories');
-  return response.data.data;
+  const r = await apiClient.get('/dashboard/variety-categories');
+  return r.data.data;
 };
 
-/**
- * 获取最近活动记录
- * GET /api/v1/dashboard/recent-activities?limit=10
- */
-export const getRecentActivities = async (limit: number = 10): Promise<Activity[]> => {
-  const response = await apiClient.get('/dashboard/recent-activities', {
-    params: { limit },
-  });
-  return response.data.data;
+export const getRecentActivities = async (limit = 10): Promise<Activity[]> => {
+  const r = await apiClient.get('/dashboard/recent-activities', { params: { limit } });
+  return r.data.data;
+};
+
+export const getOperationTrends = async (): Promise<{ dates: string[]; counts: number[] }> => {
+  const r = await apiClient.get('/dashboard/trends');
+  return r.data.data;
+};
+
+// ===== 新增接口 =====
+export const getAllPlots = async (): Promise<PlotItem[]> => {
+  const r = await apiClient.get('/plots');
+  return r.data.data || [];
+};
+
+export const getAllEquipment = async (): Promise<EquipmentItem[]> => {
+  const r = await apiClient.get('/equipment');
+  return r.data.data || [];
+};
+
+export const getMaintenanceAlerts = async (): Promise<EquipmentItem[]> => {
+  const r = await apiClient.get('/equipment/maintenance-alerts');
+  return r.data.data || [];
+};
+
+export const getAllBatches = async (): Promise<BatchItem[]> => {
+  const r = await apiClient.get('/production-batches');
+  return r.data.data || [];
+};
+
+export const getAllOperations = async (): Promise<OperationItem[]> => {
+  const r = await apiClient.get('/farming-operations');
+  return r.data.data || [];
+};
+
+export const getStaffStats = async (): Promise<{ totalStaff: number; activeStaff: number; byRole: { role: string; count: number }[] }> => {
+  const r = await apiClient.get('/staff/statistics');
+  return r.data.data;
+};
+
+export const getNotifications = async (): Promise<any[]> => {
+  try {
+    const r = await apiClient.get('/notifications');
+    return r.data.data || [];
+  } catch { return []; }
+};
+
+export const getInventoryList = async (): Promise<any[]> => {
+  try {
+    const r = await apiClient.get('/inventory');
+    return r.data.data || [];
+  } catch { return []; }
 };

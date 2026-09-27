@@ -29,19 +29,13 @@ export class AuditLog {
   @Column({ nullable: true })
   username?: string;
 
-  @Column({
-    type: 'enum',
-    enum: AuditActionType,
-  })
+  @Column({ type: 'varchar', length: 50 })
   actionType!: AuditActionType;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'simple-json', nullable: true })
   actionParams?: Record<string, any>;
 
-  @Column({
-    type: 'enum',
-    enum: AuditResult,
-  })
+  @Column({ type: 'varchar', length: 20 })
   result!: AuditResult;
 
   @Column({ nullable: true })

@@ -85,3 +85,20 @@ export const getRecentActivities = [
     }
   },
 ];
+
+/**
+ * 获取农事趋势数据
+ * GET /api/v1/dashboard/trends
+ */
+export const getOperationTrends = [
+  authenticate,
+  authorize(['系统管理员', '农艺师', '操作员', '只读观察者']),
+  async (_req: Request, res: Response) => {
+    try {
+      const trends = await dashboardService.getOperationTrends();
+      res.json({ data: trends });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || '获取趋势数据失败', code: 'TREND_ERROR' });
+    }
+  },
+];

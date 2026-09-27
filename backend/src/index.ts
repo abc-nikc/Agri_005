@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -6,9 +6,7 @@ import cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
 import { AppDataSource } from './config/database';
 import { authenticate } from './middlewares/authenticate';
-import { authorize } from './middlewares/authorize';
 import { errorHandler } from './middlewares/error-handler';
-import { auditLogger } from './middlewares/audit-logger';
 import { loginRateLimit, clearLoginAttempts, recordFailedLogin } from './middlewares/login-rate-limit';
 
 // 导入路由
@@ -30,7 +28,9 @@ const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
       'http://localhost:5173',
+      'http://127.0.0.1:5173',
       'http://localhost:3000',
+      'http://127.0.0.1:3000',
     ];
     
     // 允许不带 origin 的请求（如移动应用、Postman）
@@ -61,7 +61,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // ==================== 健康检查 ====================
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -130,11 +130,11 @@ app.post('/api/v1/auth/refresh', async (req: Request, res: Response) => {
     const authService = new authServiceModule.AuthService();
     const result = await authService.refreshToken(refreshToken);
     
-    res.json({
+    return res.json({
       accessToken: result.accessToken,
     });
   } catch (error: any) {
-    res.status(401).json({
+    return res.status(401).json({
       error: error.message || 'Refresh Token 无效',
       code: 'REFRESH_TOKEN_INVALID',
     });
@@ -194,7 +194,7 @@ const startServer = async () => {
   try {
     // 初始化数据库连接
     await AppDataSource.initialize();
-    console.log('[INFO] Connected to PostgreSQL database');
+    console.log('[INFO] Connected to MySQL database');
 
     // 自动创建 admin 用户（如果不存在）
     const { Staff } = await import('./models/staff.entity');
@@ -239,6 +239,14 @@ const startServer = async () => {
       console.log('[INFO] MQTT IoT 数据收集已启动');
     } catch (e: any) {
       console.log('[WARN] MQTT 服务启动失败（非阻塞）:', e.message);
+    }
+
+    // 启动设备维护提醒定时检测
+    try {
+      const { equipmentService } = await import('./services/equipment.service');
+      equipmentService.startMaintenanceChecker();
+    } catch (e: any) {
+      console.log('[WARN] 设备维护检测启动失败:', e.message);
     }
     
     // 启动 HTTP 服务器

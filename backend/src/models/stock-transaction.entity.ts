@@ -1,4 +1,4 @@
-import { Entity, Column, Index } from 'typeorm';
+﻿import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 
 export type TransactionType = '入库' | '出库';
@@ -40,7 +40,7 @@ export class StockTransaction extends BaseEntity {
   @Column({ name: 'batch_number', length: 100, nullable: true })
   batchNumber?: string;
 
-  @Column({ name: 'transaction_date', type: 'timestamp' })
+  @Column({ name: 'transaction_date', type: 'datetime' })
   @Index()
   transactionDate!: Date;
 

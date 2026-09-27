@@ -90,7 +90,7 @@
 ### 技术栈约束
 
 - 后端服务 MUST 支持 Linux 环境部署，推荐语言为 Node.js（TypeScript）或 Python ≥ 3.11。
-- 数据库 MUST 使用时序数据库（如 InfluxDB、TimescaleDB、TDengine）作为传感数据主存储，关系型数据库（如 PostgreSQL）作为业务数据与审计日志存储。
+- 数据库 MUST 使用时序数据库（如 InfluxDB、TimescaleDB、TDengine）作为传感数据主存储，MySQL 作为业务数据与审计日志存储。
 - 前端框架 MUST 支持组件化开发，推荐 Vue 3 + TypeScript 或 React 18 + TypeScript。
 - 设备通信协议默认采用 MQTT（QoS ≥ 1），MUST 支持 TLS 加密传输。
 

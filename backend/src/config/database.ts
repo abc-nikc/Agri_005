@@ -17,19 +17,22 @@ import { TraceabilityRecord } from '../models/traceability-record.entity';
 import { CostRecord } from '../models/cost-record.entity';
 import { SalesRecord } from '../models/sales-record.entity';
 import { SensorData } from '../models/sensor-data.entity';
+import { AlertRecord } from '../models/alert-record.entity';
 import { SystemSettings } from '../models/system-settings.entity';
-
+import { FarmTask } from '../models/farm-task.entity';
 config();
 
 export const AppDataSource = new DataSource({
-  type: 'postgres',
+  type: 'mysql',
   host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'LZY123',
+  port: parseInt(process.env.DB_PORT || '3306'),
+  username: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'root123',
   database: process.env.DB_NAME || 'farm_management',
-  synchronize: process.env.NODE_ENV !== 'production', // 开发环境自动建表
-  logging: process.env.NODE_ENV === 'development',
+  charset: 'utf8mb4',
+  timezone: '+08:00',
+  synchronize: process.env.DB_SYNCHRONIZE !== 'false',
+  logging: process.env.DB_LOGGING === 'true',
   entities: [
     AuditLog,
     BaseEntity,
@@ -48,11 +51,13 @@ export const AppDataSource = new DataSource({
     CostRecord,
     SalesRecord,
     SensorData,
+    AlertRecord,
     SystemSettings,
+    FarmTask,
   ],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   subscribers: [__dirname + '/../subscribers/*{.ts,.js}'],
   extra: {
-    connectionLimit: 10,
+    connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
   },
 });

@@ -1,10 +1,5 @@
-import axios from 'axios';
 import type { PlantingPlan, PlantingPlanFormData } from '@/types/planting-plan';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-
-const apiClient = axios.create({ baseURL: API_BASE_URL, headers: { 'Content-Type': 'application/json' } });
-apiClient.interceptors.request.use(c => { const t = localStorage.getItem('access_token'); if (t) c.headers.Authorization = `Bearer ${t}`; return c; });
+import { apiClient } from './api-client';
 
 export const plantingPlanService = {
   async getAll(params?: any): Promise<PlantingPlan[]> { const r = await apiClient.get('/planting-plans', { params }); return r.data.data; },

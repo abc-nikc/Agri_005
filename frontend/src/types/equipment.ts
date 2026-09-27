@@ -4,6 +4,7 @@ export interface Equipment {
   type: string;
   status: string;
   associatedPlotId?: string;
+  associatedPlotNumber?: string;
   nextMaintenanceDate?: string;
   mqttTopic?: string;
   createdAt: string;

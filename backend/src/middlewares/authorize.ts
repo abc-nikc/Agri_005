@@ -45,7 +45,7 @@ export const authorize = (
       // 记录授权日志（审计）
       console.log(`[AUTH] User ${req.user.username} (${req.user.role}) accessed ${req.method} ${req.path}`);
       
-      next();
+      return next();
     } catch (error) {
       return res.status(500).json({
         error: '授权过程中发生错误',

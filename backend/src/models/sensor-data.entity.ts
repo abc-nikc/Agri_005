@@ -1,4 +1,4 @@
-import { Entity, Column, Index } from 'typeorm';
+﻿import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 
 @Entity('sensor_data')
@@ -20,7 +20,7 @@ export class SensorData extends BaseEntity {
   @Column({ name: 'unit', length: 20 })
   unit!: string;
 
-  @Column({ name: 'recorded_at', type: 'timestamp' })
+  @Column({ name: 'recorded_at', type: 'datetime' })
   @Index()
   recordedAt!: Date;
 

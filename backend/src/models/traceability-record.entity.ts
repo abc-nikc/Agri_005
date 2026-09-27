@@ -1,10 +1,9 @@
-import { Entity, Column, Index } from 'typeorm';
+﻿import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 
 @Entity('traceability_records')
 export class TraceabilityRecord extends BaseEntity {
   @Column({ name: 'trace_code', length: 50, unique: true })
-  @Index()
   traceCode!: string;
 
   @Column({ name: 'batch_id', length: 36 })
@@ -29,22 +28,22 @@ export class TraceabilityRecord extends BaseEntity {
   @Column({ name: 'area', type: 'decimal', precision: 10, scale: 2 })
   area!: number;
 
-  @Column({ name: 'operations_data', type: 'jsonb', nullable: true })
+  @Column({ name: 'operations_data', type: 'simple-json', nullable: true })
   operationsData?: any[];
 
-  @Column({ name: 'inputs_data', type: 'jsonb', nullable: true })
+  @Column({ name: 'inputs_data', type: 'simple-json', nullable: true })
   inputsData?: any[];
 
-  @Column({ name: 'inventory_data', type: 'jsonb', nullable: true })
+  @Column({ name: 'inventory_data', type: 'simple-json', nullable: true })
   inventoryData?: any[];
 
-  @Column({ name: 'sales_data', type: 'jsonb', nullable: true })
+  @Column({ name: 'sales_data', type: 'simple-json', nullable: true })
   salesData?: any[];
 
   @Column({ name: 'qr_code_url', length: 500, nullable: true })
   qrCodeUrl?: string;
 
-  @Column({ name: 'exported_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'exported_at', type: 'datetime', nullable: true })
   exportedAt?: Date;
 
   @Column({ name: 'exported_by', length: 100, nullable: true })

@@ -69,27 +69,26 @@ export class NotificationService {
    */
   async getUnreadNotifications(userId: string, limit: number = 20): Promise<Notification[]> {
     return await this.notificationRepository.find({
-      where: { userId, isRead: false },
+      where: { isRead: false },
       order: { createdAt: 'DESC' },
       take: limit,
     });
   }
 
   /**
-   * 获取用户所有通知（分页）
+   * 获取用户所有通知（分页，含系统通知和用户通知）
    */
   async getAllNotifications(
     userId: string,
     page: number = 1,
     limit: number = 20
   ): Promise<{ notifications: Notification[]; total: number }> {
-    const [notifications, total] = await this.notificationRepository.findAndCount({
-      where: { userId },
-      order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
+    const qb = this.notificationRepository.createQueryBuilder('n')
+      .where('n.user_id = :userId OR n.user_id IS NULL', { userId })
+      .orderBy('n.created_at', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+    const [notifications, total] = await qb.getManyAndCount();
     return { notifications, total };
   }
 
@@ -125,7 +124,7 @@ export class NotificationService {
    */
   async getUnreadCount(userId: string): Promise<number> {
     return await this.notificationRepository.count({
-      where: { userId, isRead: false },
+      where: { isRead: false },
     });
   }
 

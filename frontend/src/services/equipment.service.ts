@@ -1,23 +1,5 @@
-import axios from 'axios';
 import type { Equipment, CreateEquipmentDto, UpdateEquipmentDto, EquipmentQueryParams } from '@/types/equipment';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// 请求拦截器 - 添加 token
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import { apiClient } from './api-client';
 
 export const equipmentService = {
   // 获取设备列表

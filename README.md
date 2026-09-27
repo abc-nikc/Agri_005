@@ -18,7 +18,7 @@
 **后端:**
 - Node.js + TypeScript
 - Express.js
-- PostgreSQL + TypeORM
+- MySQL 8.0 + TypeORM
 - InfluxDB (时序数据)
 - MQTT (物联网通信)
 - Redis (缓存)
@@ -37,7 +37,7 @@
 ### 环境要求
 
 1. **Node.js** (v18 或更高版本) - [下载地址](https://nodejs.org/)
-2. **PostgreSQL** (v14 或更高版本) - [下载地址](https://www.postgresql.org/download/)
+2. **MySQL** (v8.0 或更高版本) - [下载地址](https://dev.mysql.com/downloads/mysql/)
 3. **InfluxDB** (v2.7 或更高版本) - [下载地址](https://portal.influxdata.com/downloads/)
 4. **Redis** (可选) - [下载地址](https://redis.io/download/)
 5. **MQTT Broker** (可选, 如 Mosquitto) - [下载地址](https://mosquitto.org/download/)
@@ -70,12 +70,11 @@ npm install
 NODE_ENV=development
 PORT=3000
 
-# 数据库配置 (PostgreSQL)
-DATABASE_URL=postgresql://postgres:password@localhost:5432/farm_management
+# 数据库配置 (MySQL)
 DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=your_password
+DB_PORT=3306
+DB_USER=farm_user
+DB_PASSWORD=farm_password
 DB_NAME=farm_management
 
 # InfluxDB 配置
@@ -111,9 +110,9 @@ VITE_APP_TITLE=农场管家系统
 #### 5. 创建数据库
 
 ```bash
-# 连接到 PostgreSQL 并创建数据库
-psql -U postgres
-CREATE DATABASE farm_management;
+# 连接到 MySQL 并创建数据库
+mysql -u root -p
+CREATE DATABASE farm_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 #### 6. 运行数据库迁移
@@ -322,6 +321,17 @@ npm run migration:revert    # 回滚迁移
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 开启 Pull Request
+
+## 许可证
+
+本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
+
+## 联系方式
+
+如有问题或建议，请通过以下方式联系:
+
+- 项目 Issues: [创建 Issue](<repository-url>/issues)
+- 邮箱: support@farm-management.com
 
 ---
 

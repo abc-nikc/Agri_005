@@ -1,14 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+﻿import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
-import { Staff } from './staff.entity';
 
 @Entity('notifications')
 export class Notification extends BaseEntity {
-  @Column({ name: 'user_id' })
-  userId!: string;
-
-  @ManyToOne(() => Staff, { nullable: true })
-  user?: Staff;
+  @Column({ name: 'user_id', nullable: true })
+  userId?: string;
 
   @Column('text')
   message!: string;
@@ -16,7 +12,7 @@ export class Notification extends BaseEntity {
   @Column({ name: 'is_read', default: false })
   isRead!: boolean;
 
-  @Column({ name: 'read_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'read_at', type: 'datetime', nullable: true })
   readAt?: Date;
 
   @Column({ name: 'type', length: 50, default: 'info' })

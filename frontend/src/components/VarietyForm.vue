@@ -2,6 +2,7 @@
   <div class="modal-overlay">
     <div class="modal-content">
       <h3>{{ isEdit ? '编辑品种' : '添加品种' }}</h3>
+      <div v-if="errorMsg" class="error-bar">{{ errorMsg }}</div>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="name">品种名称 *</label>
@@ -40,64 +41,28 @@
         </div>
 
         <div class="form-group">
-          <label for="plantingDensity">种植密度(株/㎡) *</label>
-          <input
-            id="plantingDensity"
-            v-model.number="formData.plantingDensity"
-            type="number"
-            required
-            min="1"
-            placeholder="例如：25"
-          />
+          <label for="plantingDensity">种植密度(株/㎡)</label>
+          <input id="plantingDensity" v-model.number="formData.plantingDensity" type="number" placeholder="例如：2500" />
         </div>
 
         <div class="form-group">
-          <label for="fertilizationRate">施肥量(kg/亩) *</label>
-          <input
-            id="fertilizationRate"
-            v-model.number="formData.fertilizationRate"
-            type="number"
-            required
-            min="0"
-            step="0.1"
-            placeholder="例如：500"
-          />
+          <label for="fertilizationRate">施肥量(kg/亩)</label>
+          <input id="fertilizationRate" v-model.number="formData.fertilizationRate" type="number" step="0.1" placeholder="例如：45" />
         </div>
 
         <div class="form-group">
-          <label for="wateringFrequency">浇水频率(次/周) *</label>
-          <input
-            id="wateringFrequency"
-            v-model.number="formData.wateringFrequency"
-            type="number"
-            required
-            min="0"
-            placeholder="例如：3"
-          />
+          <label for="wateringFrequency">浇水频率(次/周)</label>
+          <input id="wateringFrequency" v-model.number="formData.wateringFrequency" type="number" placeholder="例如：3" />
         </div>
 
         <div class="form-group">
-          <label for="growthCycle">生长周期(天) *</label>
-          <input
-            id="growthCycle"
-            v-model.number="formData.growthCycle"
-            type="number"
-            required
-            min="1"
-            placeholder="例如：45"
-          />
+          <label for="growthCycle">生长周期(天)</label>
+          <input id="growthCycle" v-model.number="formData.growthCycle" type="number" placeholder="例如：90" />
         </div>
 
         <div class="form-group">
-          <label for="safetyInterval">安全间隔期(天) *</label>
-          <input
-            id="safetyInterval"
-            v-model.number="formData.safetyInterval"
-            type="number"
-            required
-            min="0"
-            placeholder="例如：7"
-          />
+          <label for="safetyInterval">安全间隔期(天)</label>
+          <input id="safetyInterval" v-model.number="formData.safetyInterval" type="number" placeholder="例如：7" />
         </div>
 
         <div class="form-actions">
@@ -114,11 +79,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { Variety, CreateVarietyDto, UpdateVarietyDto } from '@/types/variety';
 
 const props = defineProps<{
   variety?: Variety | null;
+  error?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -127,6 +93,7 @@ const emit = defineEmits<{
 }>();
 
 const loading = ref(false);
+const errorMsg = ref<string | null>(null);
 const sowingSeasonText = ref('');
 
 const formData = ref<CreateVarietyDto>({
@@ -142,35 +109,41 @@ const formData = ref<CreateVarietyDto>({
 
 const isEdit = computed(() => !!props.variety);
 
-onMounted(() => {
-  if (props.variety) {
-    formData.value = {
-      name: props.variety.name,
-      category: props.variety.category,
-      sowingSeason: props.variety.sowingSeason || [],
-      plantingDensity: props.variety.plantingDensity ?? 0,
-      fertilizationRate: props.variety.fertilizationRate ?? 0,
-      wateringFrequency: props.variety.wateringFrequency ?? 0,
-      growthCycle: props.variety.growthCycle ?? 0,
-      safetyInterval: props.variety.safetyInterval ?? 0,
-    };
-    // 反序列化季节为文本
-    if (props.variety.sowingSeason && Array.isArray(props.variety.sowingSeason)) {
-      sowingSeasonText.value = props.variety.sowingSeason.join('');
-    }
-  }
+// 父组件传来错误时显示 + 解锁按钮
+watch(() => props.error, (e) => {
+  if (e) { errorMsg.value = e; loading.value = false; }
 });
 
+watch(() => props.variety, (newVariety) => {
+  if (newVariety) {
+    formData.value = {
+      name: newVariety.name,
+      category: newVariety.category,
+      sowingSeason: newVariety.sowingSeason || [],
+      plantingDensity: newVariety.plantingDensity ?? 0,
+      fertilizationRate: newVariety.fertilizationRate ?? 0,
+      wateringFrequency: newVariety.wateringFrequency ?? 0,
+      growthCycle: newVariety.growthCycle ?? 0,
+      safetyInterval: newVariety.safetyInterval ?? 0,
+    };
+    if (newVariety.sowingSeason && Array.isArray(newVariety.sowingSeason)) {
+      sowingSeasonText.value = newVariety.sowingSeason.join('');
+    }
+  }
+}, { immediate: true });
+
 const handleSubmit = () => {
+  errorMsg.value = null;
+  if (!formData.value.name.trim()) { errorMsg.value = '品种名称不能为空'; return; }
+  if (!formData.value.category) { errorMsg.value = '请选择分类'; return; }
+  if (!sowingSeasonText.value) { errorMsg.value = '请选择播种季节'; return; }
+
   loading.value = true;
-  // 将季节文本转为数组
   const data: any = { ...formData.value };
   if (sowingSeasonText.value) {
-    // 全年/春秋 → 拆分为单字数组
     data.sowingSeason = sowingSeasonText.value.split('');
   }
   emit('save', data);
-  loading.value = false;
 };
 </script>
 
@@ -245,4 +218,5 @@ const handleSubmit = () => {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.error-bar { background: #fce4ec; color: #c62828; padding: 8px 14px; border-radius: 4px; margin-bottom: 16px; font-size: 0.85rem; }
 </style>

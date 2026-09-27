@@ -9,7 +9,7 @@ export class Variety extends BaseEntity {
   @Column({ name: 'category', length: 50 })
   category!: string;
 
-  @Column({ name: 'sowing_season', type: 'jsonb', nullable: true })
+  @Column({ name: 'sowing_season', type: 'simple-json', nullable: true })
   sowingSeason?: string[];
 
   @Column({ name: 'planting_density', type: 'int', nullable: true })

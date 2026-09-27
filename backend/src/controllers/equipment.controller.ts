@@ -6,19 +6,23 @@ export class EquipmentController {
   async getEquipment(req: Request, res: Response, next: NextFunction) {
     try {
       const { type, status, plot_id } = req.query;
-      const filters: any = {};
+      console.log('[EQUIP] Filter:', { type, status, plot_id });
       
+      const filters: any = {};
       if (type) filters.type = type;
       if (status) filters.status = status;
       if (plot_id) filters.associated_plot_id = plot_id;
 
       const equipment = await equipmentService.getEquipment(filters);
+      console.log('[EQUIP] Result count:', equipment.length);
+      
       res.json({
         success: true,
         data: equipment,
         message: '获取设备列表成功',
       });
     } catch (error) {
+      console.error('[EQUIP] Error:', error);
       next(error);
     }
   }
@@ -49,6 +53,7 @@ export class EquipmentController {
   // 创建设备
   async createEquipment(req: Request, res: Response, next: NextFunction) {
     try {
+      console.log('[EQUIP CREATE] Body:', JSON.stringify(req.body));
       const equipmentData = req.body;
       const equipment = await equipmentService.createEquipment(equipmentData);
       
@@ -57,8 +62,9 @@ export class EquipmentController {
         data: equipment,
         message: '创建设备成功',
       });
-    } catch (error) {
-      next(error);
+    } catch (error: any) {
+      console.error('[EQUIP CREATE] Error:', error.message, error.stack);
+      return res.status(400).json({ success: false, error: error.message || '创建失败' });
     }
   }
 

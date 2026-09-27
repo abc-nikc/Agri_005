@@ -1,9 +1,5 @@
-import axios from 'axios';
 import type { Inventory, StockTransaction, Stocktake, StockInForm, StockOutForm, StocktakeForm } from '@/types/inventory';
-
-const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-const c = axios.create({ baseURL: API, headers: { 'Content-Type': 'application/json' } });
-c.interceptors.request.use(x => { const t = localStorage.getItem('access_token'); if (t) x.headers.Authorization = `Bearer ${t}`; return x; });
+import { apiClient as c } from './api-client';
 
 export const inventoryService = {
   getAll: async (p?: any): Promise<Inventory[]> => { const r = await c.get('/inventory', { params: p }); return r.data.data; },

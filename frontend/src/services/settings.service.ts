@@ -1,8 +1,4 @@
-import axios from 'axios';
-
-const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-const c = axios.create({ baseURL: API, headers: { 'Content-Type': 'application/json' } });
-c.interceptors.request.use(x => { const t = localStorage.getItem('access_token'); if (t) x.headers.Authorization = `Bearer ${t}`; return x; });
+import { apiClient as c } from './api-client';
 
 export interface SettingsItem {
   id: string; settingKey: string; settingValue: string; settingType: string; description?: string; updatedBy?: string; updatedAt?: string;

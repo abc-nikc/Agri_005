@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
-import { AuditLog } from '../models/audit-log.entity';
+import { AuditActionType, AuditLog, AuditResult } from '../models/audit-log.entity';
 
 /**
  * 审计日志中间件
@@ -32,20 +32,19 @@ export const auditLogger = async (
 
         await auditLogRepository.save({
           userId: user?.id,
-          userIp: req.ip || req.socket.remoteAddress,
-          actionType: `${req.method} ${req.path}`,
+          username: user?.username,
+          ipAddress: req.ip || req.socket.remoteAddress,
+          userAgent: req.get('user-agent'),
+          actionType: actionTypeForRequest(req),
           actionParams: {
+            targetEntity: extractEntityFromPath(req.path),
+            targetId: req.params.id || undefined,
             query: req.query,
             params: req.params,
             body: sanitizeBody(req.body), // 脱敏处理
           },
-          targetEntity: extractEntityFromPath(req.path),
-          targetId: req.params.id || undefined,
-          beforeState: null, // 需要在业务逻辑中填充
-          afterState: null, // 需要在业务逻辑中填充
-          result: res.statusCode < 400 ? '成功' : '失败',
-          errorMessage: res.statusCode >= 400 ? body : undefined,
-          createdAt: new Date(),
+          result: res.statusCode < 400 ? AuditResult.SUCCESS : AuditResult.FAILED,
+          errorMessage: res.statusCode >= 400 ? String(body) : undefined,
         });
       } catch (error) {
         console.error('[ERROR] Failed to save audit log:', error);
@@ -55,7 +54,7 @@ export const auditLogger = async (
     return originalSend.call(this, body);
   };
 
-  next();
+  return next();
 };
 
 /**
@@ -86,6 +85,14 @@ function extractEntityFromPath(path: string): string {
   return matches ? matches[1] : 'unknown';
 }
 
+function actionTypeForRequest(req: Request): AuditActionType {
+  if (req.path.includes('/auth/login')) return AuditActionType.LOGIN;
+  if (req.path.includes('/auth/logout')) return AuditActionType.LOGOUT;
+  if (req.method === 'POST') return AuditActionType.CREATE;
+  if (req.method === 'DELETE') return AuditActionType.DELETE;
+  return AuditActionType.UPDATE;
+}
+
 /**
  * 手动记录审计日志的辅助函数
  * 用于在业务逻辑中记录更详细的审计信息
@@ -103,18 +110,18 @@ export const logAudit = async (
     const auditLogRepository = AppDataSource.getRepository(AuditLog);
     await auditLogRepository.save({
       userId,
-      userIp: req.ip || req.socket.remoteAddress,
-      actionType,
+      ipAddress: req.ip || req.socket.remoteAddress,
+      userAgent: req.get('user-agent'),
+      actionType: actionType as AuditActionType,
       actionParams: {
         method: req.method,
         path: req.path,
+        targetEntity,
+        targetId,
+        beforeState,
+        afterState,
       },
-      targetEntity,
-      targetId,
-      beforeState,
-      afterState,
-      result: '成功',
-      createdAt: new Date(),
+      result: AuditResult.SUCCESS,
     });
   } catch (error) {
     console.error('[ERROR] Failed to log audit:', error);
