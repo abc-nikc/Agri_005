@@ -9,6 +9,10 @@
     "start": "node dist/index.js",
     "test": "jest --forceExit --detectOpenHandles",
     "test:watch": "jest --watch",
+    "seed": "npm run seed:base && npm run seed:business && npm run seed:enriched",
+    "seed:base": "ts-node --project ../scripts/tsconfig.json ../scripts/seed-full.ts",
+    "seed:business": "ts-node --project ../scripts/tsconfig.json ../scripts/seed-all.ts",
+    "seed:enriched": "ts-node --project ../scripts/tsconfig.json ../scripts/seed-enriched.ts",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\""

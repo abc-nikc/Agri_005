@@ -128,7 +128,9 @@ async function seed() {
       { type: '农资', name: '有机肥', spec: '25kg/袋', quantity: 100, unit: '袋', location: '农资库B', minStock: 10 },
     ];
     for (const item of items) {
-      const inv = await invRepo.save(invRepo.create(item as any));
+      const inv = invRepo.create();
+      Object.assign(inv, item);
+      await invRepo.save(inv);
       await txnRepo.save(txnRepo.create({
         type: '入库', subType: item.type === '农产品' ? '农产品入库' : '农资采购入库',
         inventoryId: inv.id, itemName: inv.name, quantity: inv.quantity,

@@ -70,15 +70,12 @@ async function seed() {
           }
           const rounded = s.type === 'light' ? Math.round(val) : parseFloat(val.toFixed(1));
           sensors.push({
-            plot_id: p.id,
-            device_id: `${p.name}-SENSOR-${sensorTypes.indexOf(s) + 1}`,
-            s_sensor_type: s.type,
-            sensor_type: s.type,
-            s_value: String(rounded),
-            value: String(rounded),
-            s_unit: s.unit,
+            plotId: p.id,
+            deviceId: `${p.name}-SENSOR-${sensorTypes.indexOf(s) + 1}`,
+            sensorType: s.type,
+            value: rounded,
             unit: s.unit,
-            recorded_at: hoursAgo(24 - hour),
+            recordedAt: hoursAgo(24 - hour),
           });
         }
       }
