@@ -41,12 +41,13 @@ protectedRouter.use('/costs', costRoutes);
 protectedRouter.use('/iot', sensorRoutes);
 protectedRouter.use('/notifications', notificationRoutes);
 protectedRouter.use('/settings', systemSettingsRoutes);
-protectedRouter.use('/sse', sseRoutes);
 protectedRouter.use('/ai', aiRoutes);
 protectedRouter.use('/farm-tasks', farmTaskRoutes);
 protectedRouter.use('/news', newsRoutes);
 
+// 公开追溯查询和 EventSource query-token 认证必须在全局 Bearer 认证之前挂载。
+router.get('/trace/:code', publicTrace);
+router.use('/sse', sseRoutes);
 router.use('/', protectedRouter);
-router.get('/api/v1/trace/:code', publicTrace);
 
 export default router;

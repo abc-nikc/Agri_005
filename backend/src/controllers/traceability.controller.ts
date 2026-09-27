@@ -22,6 +22,7 @@ export const publicTrace = async (req: Request, res: Response) => {
         area: record.area,
         operationsData: record.operationsData,
         inputsData: record.inputsData,
+        qualityData: record.qualityData,
       },
     });
   } catch (e: any) { res.status(500).json({ error: e.message }); }

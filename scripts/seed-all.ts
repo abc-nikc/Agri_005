@@ -7,6 +7,8 @@ import { SalesRecord } from '../backend/src/models/sales-record.entity';
 import { Inventory } from '../backend/src/models/inventory.entity';
 import { StockTransaction } from '../backend/src/models/stock-transaction.entity';
 import { ProductionBatch } from '../backend/src/models/production-batch.entity';
+import { Plot } from '../backend/src/models/plot.entity';
+import { Variety } from '../backend/src/models/variety.entity';
 import { hashPassword } from '../backend/src/utils/password';
 
 function d(offset: number) {
@@ -60,18 +62,20 @@ async function seed() {
 
   // ===== 3. 生产批次（已完成） =====
   const batchRepo = AppDataSource.getRepository(ProductionBatch);
-  const plots = await AppDataSource.getRepository(require('../backend/src/models/plot.entity').Plot).find();
-  const varieties = await AppDataSource.getRepository(require('../backend/src/models/variety.entity').Variety).find();
+  const plotRepo = AppDataSource.getRepository(Plot);
+  const plots = await plotRepo.find();
+  const varieties = await AppDataSource.getRepository(Variety).find();
   const batches: any[] = [];
   if (plots.length >= 2 && varieties.length >= 2) {
     const batchDefs = [
-      { plotIdx: 0, varIdx: 4, area: 10, sow: d(-120), est: d(-10), harv: d(-5) },
-      { plotIdx: 1, varIdx: 5, area: 15, sow: d(-90), est: d(-8), harv: d(-3) },
-      { plotIdx: 0, varIdx: 0, area: 5, sow: d(-60), est: d(20), harv: null },
+      { plotNumber: 'A01', varietyName: '番茄', area: 10, sow: d(120), est: d(10), harv: d(5) },
+      { plotNumber: 'B01', varietyName: '黄瓜', area: 15, sow: d(90), est: d(8), harv: d(3) },
+      { plotNumber: 'A02', varietyName: '小白菜', area: 5, sow: d(60), est: d(-20), harv: null },
     ];
     for (const bd of batchDefs) {
-      const plot = plots[bd.plotIdx];
-      const variety = varieties[bd.varIdx];
+      const plot = plots.find(p => p.plotNumber === bd.plotNumber);
+      const variety = varieties.find(v => v.name === bd.varietyName);
+      if (!plot || !variety) continue;
       const bn = `P${bd.sow.replace(/-/g,'')}-${plot.plotNumber}-${variety.name}`;
       const ex = await batchRepo.findOne({ where: { batchNumber: bn } });
       if (!ex) {
@@ -85,6 +89,12 @@ async function seed() {
         batches.push(saved);
       } else { batches.push(ex); }
     }
+    for (const plot of plots) {
+      const activeBatch = batches.find(b => b.plotId === plot.id && b.status === '进行中');
+      plot.status = activeBatch ? '已种植' : '闲置';
+      plot.currentVarietyId = activeBatch?.varietyId;
+      await plotRepo.save(plot);
+    }
   }
   console.log(`生产批次: ${batches.length} 个`);
 
@@ -95,7 +105,7 @@ async function seed() {
     const ops = [];
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
-      const plot = plots[i % plots.length];
+      const plot = plots.find(p => p.id === batch.plotId)!;
       ops.push(
         { operationType: '播种', plotId: plot.id, plotName: plot.plotNumber, varietyName: batch.varietyName, area: batch.area, operatorName: '王大山', operationDate: dt(120 - i * 30), remark: '晴天播种' },
         { operationType: '施肥', plotId: plot.id, plotName: plot.plotNumber, fertilizerName: '复合肥', fertilizerAmount: 50, fertilizerUnit: 'kg', operatorName: '王大山', operationDate: dt(90 - i * 30) },
@@ -105,7 +115,7 @@ async function seed() {
       );
       if (batch.status === '已完成') {
         ops.push(
-          { operationType: '采收', plotId: plot.id, plotName: plot.plotNumber, varietyName: batch.varietyName, harvestYield: 2000 + Math.random() * 1000, yieldUnit: 'kg', qualityGrade: '一级', harvestDestination: '冷库', operatorName: '王大山', operationDate: dt(5 - i * 30) },
+        { operationType: '采收', plotId: plot.id, plotName: plot.plotNumber, varietyName: batch.varietyName, batchId: batch.id, harvestYield: 2400 + i * 300, yieldUnit: 'kg', qualityGrade: i === 0 ? '一级' : '二级', harvestDestination: '冷库', operatorName: '王大山', operationDate: new Date(`${batch.actualHarvestDate}T10:00:00`) },
         );
       }
     }
@@ -146,16 +156,16 @@ async function seed() {
   const costCount = await costRepo.count();
   if (costCount === 0) {
     const costs = [
-      { type: '种子', description: '番茄种子', amount: 500, date: d(-120), batchId: batches[0]?.id },
-      { type: '种子', description: '黄瓜种子', amount: 400, date: d(-90), batchId: batches[1]?.id },
-      { type: '肥料', description: '复合肥', amount: 1800, date: d(-90), batchId: batches[0]?.id },
-      { type: '肥料', description: '有机肥', amount: 2500, date: d(-80), batchId: batches[0]?.id },
-      { type: '农药', description: '吡虫啉', amount: 300, date: d(-40), batchId: batches[0]?.id },
-      { type: '人工', description: '播种人工费', amount: 2000, date: d(-120), batchId: batches[0]?.id },
-      { type: '人工', description: '采收人工费', amount: 3000, date: d(-5), batchId: batches[0]?.id },
-      { type: '机械', description: '拖拉机耕地', amount: 800, date: d(-115), batchId: batches[0]?.id },
-      { type: '肥料', description: '复合肥', amount: 1500, date: d(-70), batchId: batches[1]?.id },
-      { type: '人工', description: '整枝人工费', amount: 1200, date: d(-50), batchId: batches[1]?.id },
+      { type: '种子', description: '番茄种子', amount: 500, date: d(120), batchId: batches[0]?.id },
+      { type: '种子', description: '黄瓜种子', amount: 400, date: d(90), batchId: batches[1]?.id },
+      { type: '肥料', description: '复合肥', amount: 1800, date: d(90), batchId: batches[0]?.id },
+      { type: '肥料', description: '有机肥', amount: 2500, date: d(80), batchId: batches[0]?.id },
+      { type: '农药', description: '吡虫啉', amount: 300, date: d(40), batchId: batches[0]?.id },
+      { type: '人工', description: '播种人工费', amount: 2000, date: d(120), batchId: batches[0]?.id },
+      { type: '人工', description: '采收人工费', amount: 3000, date: d(5), batchId: batches[0]?.id },
+      { type: '机械', description: '拖拉机耕地', amount: 800, date: d(115), batchId: batches[0]?.id },
+      { type: '肥料', description: '复合肥', amount: 1500, date: d(70), batchId: batches[1]?.id },
+      { type: '人工', description: '整枝人工费', amount: 1200, date: d(50), batchId: batches[1]?.id },
     ];
     for (const c of costs) { await costRepo.save(costRepo.create(c as any)); }
     console.log(`成本记录: ${costs.length} 条`);
@@ -166,10 +176,10 @@ async function seed() {
   const salesCount = await salesRepo.count();
   if (salesCount === 0) {
     const sales = [
-      { customer: '永辉超市', product: '番茄', varietyName: '番茄', quantity: 500, unit: 'kg', unitPrice: 8, totalAmount: 4000, batchNumber: batches[0]?.batchNumber, paymentStatus: '已付款', saleDate: d(-3), salesperson: '刘明辉' },
-      { customer: '盒马鲜生', product: '番茄', varietyName: '番茄', quantity: 800, unit: 'kg', unitPrice: 7.5, totalAmount: 6000, batchNumber: batches[0]?.batchNumber, paymentStatus: '已付款', saleDate: d(-2), salesperson: '刘明辉' },
-      { customer: '美团买菜', product: '黄瓜', varietyName: '黄瓜', quantity: 300, unit: 'kg', unitPrice: 5, totalAmount: 1500, batchNumber: batches[1]?.batchNumber, paymentStatus: '未付款', saleDate: d(-1), salesperson: '刘明辉' },
-      { customer: '本地菜市场', product: '番茄', varietyName: '番茄', quantity: 700, unit: 'kg', unitPrice: 6, totalAmount: 4200, batchNumber: batches[0]?.batchNumber, paymentStatus: '已付款', saleDate: d(-1), salesperson: '刘明辉' },
+      { customer: '永辉超市', product: '番茄', varietyName: '番茄', quantity: 500, unit: 'kg', unitPrice: 8, totalAmount: 4000, batchNumber: batches[0]?.batchNumber, paymentStatus: '已付款', saleDate: d(3), salesperson: '刘明辉' },
+      { customer: '盒马鲜生', product: '番茄', varietyName: '番茄', quantity: 800, unit: 'kg', unitPrice: 7.5, totalAmount: 6000, batchNumber: batches[0]?.batchNumber, paymentStatus: '已付款', saleDate: d(2), salesperson: '刘明辉' },
+      { customer: '美团买菜', product: '黄瓜', varietyName: '黄瓜', quantity: 300, unit: 'kg', unitPrice: 5, totalAmount: 1500, batchNumber: batches[1]?.batchNumber, paymentStatus: '未付款', saleDate: d(1), salesperson: '刘明辉' },
+      { customer: '本地菜市场', product: '番茄', varietyName: '番茄', quantity: 700, unit: 'kg', unitPrice: 6, totalAmount: 4200, batchNumber: batches[0]?.batchNumber, paymentStatus: '已付款', saleDate: d(1), salesperson: '刘明辉' },
     ];
     for (const s of sales) { await salesRepo.save(salesRepo.create(s as any)); }
     console.log(`销售记录: ${sales.length} 条`);

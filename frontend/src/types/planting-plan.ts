@@ -41,6 +41,12 @@ export interface ProductionBatch {
   actualHarvestDate?: string;
   area: number;
   traceabilityCode?: string;
+  actualYield?: number;
+  qualityStatus: '待检' | '合格' | '不合格';
+  qualityGrade?: string;
+  inspectionNotes?: string;
+  inspectedAt?: string;
+  inspectedBy?: string;
   planId?: string;
   remark?: string;
   createdAt: string;

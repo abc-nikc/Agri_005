@@ -1,90 +1,146 @@
 import { Repository } from 'typeorm';
+import nodemailer from 'nodemailer';
 import { AppDataSource } from '../config/database';
 import { Notification } from '../models/notification.entity';
+import { mqttService } from './mqtt.service';
 
-/**
- * 通知服务接口
- * v1 实现系统内消息通知
- * v1.1 扩展：短信、微信推送
- */
-export interface NotificationChannel {
-  send(userId: string, message: string, type?: string, link?: string): Promise<void>;
+export type NotificationChannelName = 'in_app' | 'email' | 'wechat' | 'mqtt';
+
+export interface NotificationPayload {
+  type?: string;
+  link?: string;
+  email?: string;
 }
 
-/**
- * 系统内通知渠道（v1）
- */
+export interface NotificationChannel {
+  readonly name: NotificationChannelName;
+  isConfigured(): boolean;
+  send(userId: string, message: string, payload?: NotificationPayload): Promise<void>;
+}
+
 class InAppNotificationChannel implements NotificationChannel {
-  async send(userId: string, message: string, type: string = 'info', link?: string): Promise<void> {
-    const notificationRepository = AppDataSource.getRepository(Notification);
-    await notificationRepository.save({
-      userId,
+  readonly name = 'in_app' as const;
+  isConfigured() { return true; }
+
+  async send(userId: string, message: string, payload: NotificationPayload = {}): Promise<void> {
+    const repository = AppDataSource.getRepository(Notification);
+    await repository.save({
+      userId: userId || undefined,
       message,
-      type,
-      link,
+      type: payload.type || 'info',
+      link: payload.link,
       isRead: false,
       createdAt: new Date(),
     });
   }
 }
 
-/**
- * 通知服务
- */
+class EmailNotificationChannel implements NotificationChannel {
+  readonly name = 'email' as const;
+  isConfigured() { return Boolean(process.env.SMTP_HOST && process.env.SMTP_FROM && process.env.SMTP_TO); }
+
+  async send(_userId: string, message: string, payload: NotificationPayload = {}): Promise<void> {
+    const recipient = payload.email || process.env.SMTP_TO;
+    if (!this.isConfigured() || !recipient) throw new Error('邮件通知未配置 SMTP_HOST、SMTP_FROM、SMTP_TO');
+    const transport = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 465),
+      secure: process.env.SMTP_SECURE !== 'false',
+      auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD } : undefined,
+    });
+    await transport.sendMail({
+      from: process.env.SMTP_FROM,
+      to: recipient,
+      subject: `[农场管家] ${payload.type === 'error' ? '紧急通知' : '系统通知'}`,
+      text: `${message}${payload.link ? `\n\n查看详情：${payload.link}` : ''}`,
+    });
+  }
+}
+
+class WechatNotificationChannel implements NotificationChannel {
+  readonly name = 'wechat' as const;
+  isConfigured() { return Boolean(process.env.WECHAT_WEBHOOK_URL); }
+
+  async send(_userId: string, message: string, payload: NotificationPayload = {}): Promise<void> {
+    if (!this.isConfigured()) throw new Error('微信通知未配置 WECHAT_WEBHOOK_URL');
+    const response = await fetch(process.env.WECHAT_WEBHOOK_URL!, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ msgtype: 'text', text: { content: `【农场管家】${message}${payload.link ? `\n${payload.link}` : ''}` } }),
+    });
+    if (!response.ok) throw new Error(`微信机器人返回 HTTP ${response.status}`);
+    const result: any = await response.json();
+    if (result.errcode !== undefined && result.errcode !== 0) throw new Error(result.errmsg || '微信通知发送失败');
+  }
+}
+
+class MqttNotificationChannel implements NotificationChannel {
+  readonly name = 'mqtt' as const;
+  isConfigured() { return Boolean(process.env.MQTT_BROKER_URL); }
+
+  async send(userId: string, message: string, payload: NotificationPayload = {}): Promise<void> {
+    if (!this.isConfigured()) throw new Error('MQTT 通知未配置 MQTT_BROKER_URL');
+    await mqttService.publish(`farm/notifications/${userId || 'broadcast'}`, {
+      userId: userId || null,
+      message,
+      type: payload.type || 'info',
+      link: payload.link,
+      timestamp: new Date().toISOString(),
+    }, { qos: 1 });
+  }
+}
+
 export class NotificationService {
-  private channels: NotificationChannel[] = [];
+  private channels = new Map<NotificationChannelName, NotificationChannel>();
   private notificationRepository: Repository<Notification>;
 
   constructor() {
-    // v1 默认启用系统内通知
-    this.channels.push(new InAppNotificationChannel());
+    [new InAppNotificationChannel(), new EmailNotificationChannel(), new WechatNotificationChannel(), new MqttNotificationChannel()]
+      .forEach(channel => this.channels.set(channel.name, channel));
     this.notificationRepository = AppDataSource.getRepository(Notification);
   }
 
-  /**
-   * 发送通知（支持多渠道）
-   */
   async sendNotification(
     userId: string,
     message: string,
-    options: { type?: string; link?: string; channels?: number[] } = {}
+    options: NotificationPayload & { channels?: NotificationChannelName[] } = {}
   ): Promise<void> {
-    const { type = 'info', link, channels } = options;
-    
-    const targetChannels = channels
-      ? channels.map(i => this.channels[i]).filter(Boolean)
-      : this.channels;
+    const configuredDefaults = (process.env.NOTIFICATION_CHANNELS || 'in_app')
+      .split(',').map(v => v.trim()).filter(Boolean) as NotificationChannelName[];
+    const names = options.channels || configuredDefaults;
 
-    for (const channel of targetChannels) {
+    for (const name of names) {
+      const channel = this.channels.get(name);
+      if (!channel || !channel.isConfigured()) continue;
       try {
-        await channel.send(userId, message, type, link);
-      } catch (error) {
-        console.error('[NOTIFICATION] Failed to send via channel:', error);
+        await channel.send(userId, message, options);
+      } catch (error: any) {
+        console.error(`[NOTIFICATION] ${name} 发送失败:`, error.message || error);
       }
     }
   }
 
-  /**
-   * 获取用户未读通知
-   */
-  async getUnreadNotifications(userId: string, limit: number = 20): Promise<Notification[]> {
-    return await this.notificationRepository.find({
-      where: { isRead: false },
-      order: { createdAt: 'DESC' },
-      take: limit,
-    });
+  getChannelStatus() {
+    const enabled = (process.env.NOTIFICATION_CHANNELS || 'in_app').split(',').map(v => v.trim());
+    return [...this.channels.values()].map(channel => ({
+      name: channel.name,
+      configured: channel.isConfigured(),
+      enabled: enabled.includes(channel.name),
+    }));
   }
 
-  /**
-   * 获取用户所有通知（分页，含系统通知和用户通知）
-   */
-  async getAllNotifications(
-    userId: string,
-    page: number = 1,
-    limit: number = 20
-  ): Promise<{ notifications: Notification[]; total: number }> {
+  async getUnreadNotifications(userId: string, limit: number = 20): Promise<Notification[]> {
+    return await this.notificationRepository.createQueryBuilder('n')
+      .where('(n.user_id = :userId OR n.user_id IS NULL)', { userId })
+      .andWhere('n.is_read = false')
+      .orderBy('n.created_at', 'DESC')
+      .take(limit)
+      .getMany();
+  }
+
+  async getAllNotifications(userId: string, page: number = 1, limit: number = 20) {
     const qb = this.notificationRepository.createQueryBuilder('n')
-      .where('n.user_id = :userId OR n.user_id IS NULL', { userId })
+      .where('(n.user_id = :userId OR n.user_id IS NULL)', { userId })
       .orderBy('n.created_at', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
@@ -92,46 +148,37 @@ export class NotificationService {
     return { notifications, total };
   }
 
-  /**
-   * 标记通知为已读
-   */
   async markAsRead(notificationId: string, userId: string): Promise<void> {
-    await this.notificationRepository.update(
-      { id: notificationId, userId },
-      { isRead: true, readAt: new Date() }
-    );
+    await this.notificationRepository.createQueryBuilder()
+      .update(Notification)
+      .set({ isRead: true, readAt: new Date() })
+      .where('id = :id AND (user_id = :userId OR user_id IS NULL)', { id: notificationId, userId })
+      .execute();
   }
 
-  /**
-   * 标记所有通知为已读
-   */
   async markAllAsRead(userId: string): Promise<void> {
-    await this.notificationRepository.update(
-      { userId, isRead: false },
-      { isRead: true, readAt: new Date() }
-    );
+    await this.notificationRepository.createQueryBuilder()
+      .update(Notification)
+      .set({ isRead: true, readAt: new Date() })
+      .where('(user_id = :userId OR user_id IS NULL) AND is_read = false', { userId })
+      .execute();
   }
 
-  /**
-   * 删除通知
-   */
   async deleteNotification(notificationId: string, userId: string): Promise<void> {
-    await this.notificationRepository.delete({ id: notificationId, userId });
+    await this.notificationRepository.createQueryBuilder()
+      .delete().from(Notification)
+      .where('id = :id AND (user_id = :userId OR user_id IS NULL)', { id: notificationId, userId })
+      .execute();
   }
 
-  /**
-   * 获取未读通知数量
-   */
   async getUnreadCount(userId: string): Promise<number> {
-    return await this.notificationRepository.count({
-      where: { isRead: false },
-    });
+    return await this.notificationRepository.createQueryBuilder('n')
+      .where('(n.user_id = :userId OR n.user_id IS NULL)', { userId })
+      .andWhere('n.is_read = false')
+      .getCount();
   }
 
-  /**
-   * 注册新的通知渠道（v1.1 扩展用）
-   */
   registerChannel(channel: NotificationChannel): void {
-    this.channels.push(channel);
+    this.channels.set(channel.name, channel);
   }
 }

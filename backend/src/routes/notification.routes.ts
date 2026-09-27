@@ -7,6 +7,28 @@ import { validateRequest, schemas } from '../middlewares/validation.middleware';
 const router = Router();
 const notificationService = new NotificationService();
 
+/** 获取系统内、邮件、微信和 MQTT 渠道配置状态 */
+router.get('/channels', authenticate, (_req: Request, res: Response) => {
+  res.json({ data: notificationService.getChannelStatus() });
+});
+
+/** 管理员发送渠道测试通知 */
+router.post('/test', authenticate, authorize(['系统管理员']), async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+    const channels = Array.isArray(req.body.channels) ? req.body.channels : ['in_app'];
+    await notificationService.sendNotification(userId, req.body.message || '这是一条农场管家通知渠道测试消息', {
+      type: 'info',
+      link: '/notifications',
+      channels,
+      email: req.body.email,
+    });
+    res.json({ message: '通知发送任务已执行', data: notificationService.getChannelStatus() });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message || '通知发送失败' });
+  }
+});
+
 /**
  * 获取用户通知列表
  * GET /api/v1/notifications

@@ -40,7 +40,10 @@ export class TraceabilityRecord extends BaseEntity {
   @Column({ name: 'sales_data', type: 'simple-json', nullable: true })
   salesData?: any[];
 
-  @Column({ name: 'qr_code_url', length: 500, nullable: true })
+  @Column({ name: 'quality_data', type: 'simple-json', nullable: true })
+  qualityData?: any;
+
+  @Column({ name: 'qr_code_url', type: 'longtext', nullable: true })
   qrCodeUrl?: string;
 
   @Column({ name: 'exported_at', type: 'datetime', nullable: true })

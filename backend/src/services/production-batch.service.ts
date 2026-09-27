@@ -134,6 +134,7 @@ export class ProductionBatchService {
 
     batch.status = '已完成';
     batch.actualHarvestDate = actualHarvestDate;
+    batch.qualityStatus = '待检';
     const saved = await this.repo.save(batch);
 
     // 🟢 通知管理员批次完成
@@ -159,6 +160,28 @@ export class ProductionBatchService {
     }
 
     return saved;
+  }
+
+  async inspectQuality(id: string, data: {
+    passed: boolean;
+    grade?: string;
+    actualYield?: number;
+    notes?: string;
+    inspector: string;
+  }): Promise<ProductionBatch> {
+    const batch = await this.findById(id);
+    if (!batch) throw new Error('批次不存在');
+    if (batch.status !== '已完成') throw new Error('只有已完成采收的批次才能进行质量检验');
+    if (data.passed && !data.grade) throw new Error('检验合格时必须填写品质等级');
+    if (data.actualYield !== undefined && data.actualYield <= 0) throw new Error('实际产量必须大于0');
+
+    batch.qualityStatus = data.passed ? '合格' : '不合格';
+    batch.qualityGrade = data.grade || undefined;
+    batch.actualYield = data.actualYield;
+    batch.inspectionNotes = data.notes;
+    batch.inspectedAt = new Date();
+    batch.inspectedBy = data.inspector;
+    return await this.repo.save(batch);
   }
 
   async delete(id: string): Promise<void> {
