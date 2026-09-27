@@ -326,10 +326,6 @@ npm run migration:revert    # 回滚迁移
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 开启 Pull Request
 
-## 许可证
-
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
-
 ---
 
 **注意**: 本项目仍在积极开发中，部分功能可能不稳定。生产环境使用前请充分测试。
