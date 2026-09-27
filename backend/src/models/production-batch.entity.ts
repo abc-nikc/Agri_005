@@ -38,6 +38,24 @@ export class ProductionBatch extends BaseEntity {
   @Column({ name: 'traceability_code', length: 100, nullable: true })
   traceabilityCode?: string;
 
+  @Column({ name: 'actual_yield', type: 'decimal', precision: 12, scale: 2, nullable: true })
+  actualYield?: number;
+
+  @Column({ name: 'quality_status', length: 20, default: '待检' })
+  qualityStatus!: string;
+
+  @Column({ name: 'quality_grade', length: 20, nullable: true })
+  qualityGrade?: string;
+
+  @Column({ name: 'inspection_notes', type: 'text', nullable: true })
+  inspectionNotes?: string;
+
+  @Column({ name: 'inspected_at', type: 'datetime', nullable: true })
+  inspectedAt?: Date;
+
+  @Column({ name: 'inspected_by', length: 100, nullable: true })
+  inspectedBy?: string;
+
   @Column({ name: 'plan_id', length: 36, nullable: true })
   planId?: string;
 

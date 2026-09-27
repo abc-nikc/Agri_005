@@ -6,6 +6,11 @@ import { AlertRecord } from '../backend/src/models/alert-record.entity';
 import { Notification } from '../backend/src/models/notification.entity';
 import { Plot } from '../backend/src/models/plot.entity';
 import { Variety } from '../backend/src/models/variety.entity';
+import { Staff } from '../backend/src/models/staff.entity';
+import { PlantingPlan } from '../backend/src/models/planting-plan.entity';
+import { Inventory } from '../backend/src/models/inventory.entity';
+import { Stocktake } from '../backend/src/models/stocktake.entity';
+import { TraceabilityService } from '../backend/src/services/traceability.service';
 
 function hoursAgo(h: number): Date {
   const d = new Date();
@@ -38,6 +43,10 @@ async function seed() {
   const notifRepo = AppDataSource.getRepository(Notification);
   const plotRepo = AppDataSource.getRepository(Plot);
   const varRepo = AppDataSource.getRepository(Variety);
+  const staffRepo = AppDataSource.getRepository(Staff);
+  const planRepo = AppDataSource.getRepository(PlantingPlan);
+  const inventoryRepo = AppDataSource.getRepository(Inventory);
+  const stocktakeRepo = AppDataSource.getRepository(Stocktake);
 
   const plots = await plotRepo.find();
   const varieties = await varRepo.find();
@@ -86,7 +95,24 @@ async function seed() {
     }
     console.log(`传感器数据: ${sensors.length} 条`);
   } else {
-    console.log(`传感器数据已存在: ${existingSensors} 条，跳过`);
+    const [latest] = await sensorRepo.find({ order: { recordedAt: 'DESC' }, take: 1 });
+    if (latest) {
+      const shiftSeconds = Math.max(0, Math.floor((Date.now() - latest.recordedAt.getTime()) / 1000) - 60);
+      if (shiftSeconds > 0) {
+        await sensorRepo.query(
+          'UPDATE sensor_data SET recorded_at = DATE_ADD(recorded_at, INTERVAL ? SECOND)',
+          [shiftSeconds],
+        );
+      }
+    }
+    await alertRepo.createQueryBuilder().update()
+      .set({ resolved: true, resolvedAt: new Date(), resolvedBy: 'demo-seed-refresh' })
+      .where("anomaly_type = 'offline' AND device_id LIKE '%-SENSOR-%' AND resolved = 0")
+      .execute();
+    await notifRepo.createQueryBuilder().delete()
+      .where("message LIKE :pattern", { pattern: '[IoT告警] 设备 %-SENSOR-%已离线%' })
+      .execute();
+    console.log(`传感器数据已存在: ${existingSensors} 条，时间已刷新为在线状态`);
   }
 
   // ===== 2. 生产批次 =====
@@ -122,6 +148,58 @@ async function seed() {
   } else {
     console.log(`批次已存在: ${existingBatches} 个，跳过`);
   }
+
+  // ===== 2.1 已完成批次质量检验 =====
+  const completedBatches = await batchRepo.find({ where: { status: '已完成' } });
+  for (const [index, batch] of completedBatches.entries()) {
+    if (batch.qualityStatus !== '合格') {
+      batch.qualityStatus = '合格';
+      batch.qualityGrade = index === 0 ? '一级' : '二级';
+      batch.actualYield = index === 0 ? 2680 : 2250;
+      batch.inspectionNotes = '外观、成熟度、含水率及农残快速检测均符合入库标准。';
+      batch.inspectedAt = daysAgo(2 + index);
+      batch.inspectedBy = '陈美玲';
+      await batchRepo.save(batch);
+    }
+  }
+  console.log(`质量检验: ${completedBatches.length} 个已完成批次`);
+
+  // ===== 2.2 种植计划 =====
+  if (await planRepo.count() === 0) {
+    const allBatches = await batchRepo.find({ order: { sowDate: 'ASC' } });
+    for (const batch of allBatches) {
+      await planRepo.save(planRepo.create({
+        plotId: batch.plotId,
+        plotName: batch.plotName,
+        varietyId: batch.varietyId,
+        varietyName: batch.varietyName,
+        plannedSowDate: batch.sowDate,
+        plannedHarvestDate: batch.estimatedHarvestDate,
+        status: batch.status === '已完成' ? '已完成' : '执行中',
+        solarTerm: batch.varietyName === '番茄' ? '小满' : batch.varietyName === '黄瓜' ? '夏至' : '大暑',
+        area: batch.area,
+        batchId: batch.id,
+        remark: batch.status === '已完成' ? '计划已执行并完成质量检验。' : '计划执行中，生产批次已自动关联。',
+      }));
+    }
+    const futurePlot = plots.find(p => p.plotNumber === 'B02');
+    const futureVariety = varieties.find(v => v.name === '菠菜') || varieties[0];
+    if (futurePlot && futureVariety) {
+      await planRepo.save(planRepo.create({
+        plotId: futurePlot.id,
+        plotName: futurePlot.plotNumber,
+        varietyId: futureVariety.id,
+        varietyName: futureVariety.name,
+        plannedSowDate: daysFromNow(10).toISOString().slice(0, 10),
+        plannedHarvestDate: daysFromNow(60).toISOString().slice(0, 10),
+        status: '待执行',
+        solarTerm: '寒露',
+        area: 4,
+        remark: '秋季叶菜轮作计划，待农艺师确认后执行。',
+      }));
+    }
+  }
+  console.log(`种植计划: ${await planRepo.count()} 条`);
 
   // ===== 3. 农事任务 =====
   const existingTasks = await taskRepo.count();
@@ -211,6 +289,11 @@ async function seed() {
 
   // ===== 5. 通知消息 =====
   const existingNotifs = await notifRepo.count();
+  const admin = await staffRepo.findOne({ where: { username: 'admin' } });
+  if (admin) {
+    await notifRepo.createQueryBuilder().update().set({ userId: admin.id })
+      .where('user_id IS NULL OR user_id = :empty', { empty: '' }).execute();
+  }
   if (existingNotifs < 3) {
     const notifs = [
       {
@@ -239,12 +322,45 @@ async function seed() {
       },
     ];
     for (const n of notifs) {
-      await notifRepo.save(notifRepo.create(n as any));
+      await notifRepo.save(notifRepo.create({ ...n, userId: admin?.id } as any));
     }
     console.log(`通知消息: ${notifs.length} 条`);
   } else {
     console.log(`通知已存在: ${existingNotifs} 条，跳过`);
   }
+
+  // ===== 5.1 库存盘点记录 =====
+  if (await stocktakeRepo.count() === 0) {
+    const inventoryItems = await inventoryRepo.find({ take: 3, order: { createdAt: 'ASC' } });
+    for (const [index, item] of inventoryItems.entries()) {
+      const systemQuantity = Number(item.quantity);
+      const actualQuantity = index === 1 ? systemQuantity - 5 : systemQuantity;
+      const discrepancy = actualQuantity - systemQuantity;
+      await stocktakeRepo.save(stocktakeRepo.create({
+        type: '月度',
+        executor: '赵小燕',
+        inventoryId: item.id,
+        itemName: item.name,
+        systemQuantity,
+        actualQuantity,
+        unit: item.unit,
+        discrepancy,
+        discrepancyRate: systemQuantity ? discrepancy / systemQuantity : 0,
+        result: discrepancy === 0 ? '正常' : '盘亏',
+        remark: discrepancy === 0 ? '账实相符。' : '运输及分拣损耗，已登记复核。',
+      }));
+    }
+  }
+  console.log(`库存盘点: ${await stocktakeRepo.count()} 条`);
+
+  // ===== 6. 质量追溯记录 =====
+  const traceService = new TraceabilityService();
+  let traceCount = 0;
+  for (const batch of completedBatches) {
+    await traceService.generateTrace(batch.id, 'seed');
+    traceCount++;
+  }
+  console.log(`质量追溯: ${traceCount} 条`);
 
   await AppDataSource.destroy();
   console.log('\n✅ 丰富种子数据插入完成！');

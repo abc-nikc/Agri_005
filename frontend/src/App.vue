@@ -142,7 +142,7 @@
     <!-- 主内容区 -->
     <main>
       <!-- 智慧农业标语横幅 -->
-      <div class="smart-farm-banner" v-if="isAuthenticated && currentRoute !== '/login'">
+      <div class="smart-farm-banner" v-if="showNav">
         <div class="banner-bg">
           <div class="banner-particles"></div>
         </div>
@@ -176,14 +176,14 @@
     </main>
 
     <!-- 智能建议面板 -->
-    <SmartSuggestions :suggestions="sseSuggestions" />
+    <SmartSuggestions v-if="showNav" :suggestions="sseSuggestions" />
     <!-- 撤销提示 -->
     <UndoToast :items="undoQueue" @undo="doUndo" @dismiss="dismissUndo" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { notificationService } from '@/services/notification.service';
 import { apiClient } from '@/services/api-client';
@@ -196,9 +196,8 @@ const router = useRouter();
 const route = useRoute();
 const showNav = ref(false);
 const unreadCount = ref(0);
+let lastBrowserNotificationId = '';
 
-const isAuthenticated = computed(() => !!localStorage.getItem('access_token'));
-const currentRoute = computed(() => route.path);
 const bannerStats = reactive({ devices: 12, plots: 5, alerts: 3 });
 
 const { suggestions: sseSuggestions, unreadCount: sseUnread, reconnect } = useSSE();
@@ -206,11 +205,23 @@ const { undoQueue, doUndo, dismissUndo: removeUndo, addUndo } = useUndo();
 (window as any).__addUndo = addUndo;
 
 watch(() => route.path, () => {
-  showNav.value = !!localStorage.getItem('access_token') && route.path !== '/login';
+  showNav.value = !!localStorage.getItem('access_token') && route.meta.requiresAuth === true;
   if (showNav.value) { fetchUnread(); setTimeout(reconnect, 500); }
 }, { immediate: true });
 
-watch(sseUnread, (v) => { if (v > 0) unreadCount.value = v; });
+watch(sseUnread, async (v, oldValue) => {
+  unreadCount.value = v;
+  if (v > oldValue && 'Notification' in window && window.Notification.permission === 'granted') {
+    try {
+      const latest = (await notificationService.getAll(1, 1)).data[0];
+      if (latest && latest.id !== lastBrowserNotificationId) {
+        lastBrowserNotificationId = latest.id;
+        const desktop = new window.Notification('农场管家', { body: latest.message, tag: latest.id });
+        desktop.onclick = () => { window.focus(); if (latest.link) router.push(latest.link); };
+      }
+    } catch {}
+  }
+});
 function dismissUndo(id: string) { removeUndo(id); }
 
 let unreadTimer: any = null;
@@ -230,8 +241,8 @@ onMounted(async () => {
       bannerStats.devices = res.data.data?.items?.length || res.data.data?.length || 12;
       const plotRes = await apiClient.get('/plots');
       bannerStats.plots = plotRes.data.data?.items?.length || plotRes.data.data?.length || 5;
-      const alertRes = await apiClient.get('/alerts');
-      bannerStats.alerts = alertRes.data.data?.items?.length || alertRes.data.data?.length || 3;
+      const alertRes = await apiClient.get('/iot/alerts/statistics');
+      bannerStats.alerts = alertRes.data.data?.unresolved || 0;
     }
   } catch {}
 });

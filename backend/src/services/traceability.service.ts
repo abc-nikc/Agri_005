@@ -30,7 +30,21 @@ export class TraceabilityService {
 
     // 检查是否已生成
     const existing = await this.repo.findOne({ where: { batchId } });
-    if (existing) return existing;
+    if (existing) {
+      // 已生成的追溯记录在补录质检后同步质量快照，保证公开扫码页展示最新结果。
+      existing.qualityData = {
+        status: batch.qualityStatus,
+        grade: batch.qualityGrade,
+        actualYield: batch.actualYield,
+        notes: batch.inspectionNotes,
+        inspectedAt: batch.inspectedAt,
+        inspectedBy: batch.inspectedBy,
+      };
+      if (!existing.qrCodeUrl) {
+        existing.qrCodeUrl = await QRCode.toDataURL(this.getScanUrl(existing.traceCode));
+      }
+      return await this.repo.save(existing);
+    }
 
     // 聚合农事操作数据
     const operations = await this.opRepo.find({
@@ -78,6 +92,14 @@ export class TraceabilityService {
         date: s.transactionDate, quantity: s.quantity, unit: s.unit,
         destination: s.sourceOrDest, operator: s.operator,
       })),
+      qualityData: {
+        status: batch.qualityStatus,
+        grade: batch.qualityGrade,
+        actualYield: batch.actualYield,
+        notes: batch.inspectionNotes,
+        inspectedAt: batch.inspectedAt,
+        inspectedBy: batch.inspectedBy,
+      },
     });
 
     const saved = await this.repo.save(record);
@@ -87,8 +109,7 @@ export class TraceabilityService {
     await this.batchRepo.save(batch);
 
     // FR-028: 生成二维码
-    const scanUrl = `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/trace/${traceCode}`;
-    saved.qrCodeUrl = await QRCode.toDataURL(scanUrl);
+    saved.qrCodeUrl = await QRCode.toDataURL(this.getScanUrl(traceCode));
     await this.repo.save(saved);
 
     return saved;
@@ -121,6 +142,11 @@ export class TraceabilityService {
 
   // FR-030: 不可删除（不提供delete方法）
 
+  private getScanUrl(traceCode: string): string {
+    const frontendOrigin = (process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173').split(',')[0].trim();
+    return `${frontendOrigin}/trace/${traceCode}`;
+  }
+
   private getOpDetail(op: FarmingOperation): string {
     const parts = [];
     if (op.fertilizerName) parts.push(`${op.fertilizerName}${op.fertilizerAmount}${op.fertilizerUnit || 'kg'}`);
@@ -143,6 +169,10 @@ export class TraceabilityService {
 <h2>基本信息</h2>
 <table><tr><th>地块</th><td>${record.plotName}</td><th>品种</th><td>${record.varietyName}</td></tr>
 <tr><th>播种日期</th><td>${record.sowDate}</td><th>采收日期</th><td>${record.harvestDate || '-'}</td></tr><tr><th>面积</th><td colspan="3">${record.area}亩</td></tr></table>
+<h2>质量检验</h2>
+<table><tr><th>检验结论</th><td>${record.qualityData?.status || '待检'}</td><th>品质等级</th><td>${record.qualityData?.grade || '-'}</td></tr>
+<tr><th>实际产量</th><td>${record.qualityData?.actualYield ? `${record.qualityData.actualYield}kg` : '-'}</td><th>检验员</th><td>${record.qualityData?.inspectedBy || '-'}</td></tr>
+<tr><th>检验说明</th><td colspan="3">${record.qualityData?.notes || '-'}</td></tr></table>
 <h2>农事操作记录</h2>
 <table><thead><tr><th>操作类型</th><th>日期</th><th>操作人</th><th>详情</th></tr></thead><tbody>${ops || '<tr><td colspan="4">无记录</td></tr>'}</tbody></table>
 <h2>投入品使用记录</h2>

@@ -46,6 +46,22 @@ export const completeBatch = [
   },
 ];
 
+export const inspectBatchQuality = [
+  authenticate, authorize(['系统管理员', '农艺师']),
+  async (req: Request, res: Response) => {
+    try {
+      const batch = await service.inspectQuality(req.params.id, {
+        passed: req.body.passed === true,
+        grade: req.body.grade,
+        actualYield: req.body.actualYield === undefined ? undefined : Number(req.body.actualYield),
+        notes: req.body.notes,
+        inspector: (req as any).user?.username || 'system',
+      });
+      res.json({ data: batch, message: '质量检验结果已保存' });
+    } catch (e: any) { res.status(400).json({ error: e.message }); }
+  },
+];
+
 export const deleteBatch = [
   authenticate, authorize(['系统管理员', '农艺师']),
   async (req: Request, res: Response) => {

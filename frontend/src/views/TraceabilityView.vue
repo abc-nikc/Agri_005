@@ -19,6 +19,7 @@
           <el-table-column prop="varietyName" label="品种" width="100" />
           <el-table-column prop="sowDate" label="播种" width="120" />
           <el-table-column label="采收" width="120"><template #default="{row}">{{ row.harvestDate || '-' }}</template></el-table-column>
+          <el-table-column label="质检" width="100"><template #default="{row}"><el-tag :type="row.qualityData?.status==='合格'?'success':row.qualityData?.status==='不合格'?'danger':'warning'" size="small">{{ row.qualityData?.status || '待检' }}</el-tag></template></el-table-column>
           <el-table-column label="操作" width="160" fixed="right">
             <template #default="{row}">
               <el-button type="primary" link size="small" @click="viewDetail(row)">详情</el-button>
@@ -48,6 +49,8 @@
         <div class="qr-section" v-if="detail.qrCodeUrl"><img :src="detail.qrCodeUrl" alt="QR" class="qr-img" /><p class="qr-hint">扫描二维码查看追溯信息</p></div>
         <h4 class="section-title">基本信息</h4>
         <table class="info-table"><tr><th>追溯码</th><td>{{ detail.traceCode }}</td><th>批次号</th><td>{{ detail.batchNumber }}</td></tr><tr><th>地块</th><td>{{ detail.plotName }}</td><th>品种</th><td>{{ detail.varietyName }}</td></tr><tr><th>面积</th><td>{{ detail.area }}亩</td><th>播种</th><td>{{ detail.sowDate }}</td></tr></table>
+        <h4 class="section-title">质量检验</h4>
+        <table class="info-table"><tr><th>结论</th><td>{{ detail.qualityData?.status || '待检' }}</td><th>等级</th><td>{{ detail.qualityData?.grade || '-' }}</td></tr><tr><th>实际产量</th><td>{{ detail.qualityData?.actualYield ? detail.qualityData.actualYield + 'kg' : '-' }}</td><th>检验员</th><td>{{ detail.qualityData?.inspectedBy || '-' }}</td></tr><tr><th>说明</th><td colspan="3">{{ detail.qualityData?.notes || '-' }}</td></tr></table>
         <h4 class="section-title">农事操作 ({{ detail.operationsData?.length || 0 }}条)</h4>
         <el-table v-if="detail.operationsData?.length" :data="detail.operationsData" size="small"><el-table-column prop="type" label="类型" width="80" /><el-table-column label="日期" width="120"><template #default="{row}">{{ fmt(row.date) }}</template></el-table-column><el-table-column prop="operator" label="操作人" width="100" /><el-table-column prop="detail" label="详情" /></el-table>
         <div v-else class="empty-state">无记录</div>

@@ -3,6 +3,7 @@ import { AppDataSource } from '../config/database';
 import { Equipment } from '../models/equipment.entity';
 import { Staff } from '../models/staff.entity';
 import { NotificationService } from './notification.service';
+import { Notification } from '../models/notification.entity';
 
 export class EquipmentService {
   private equipmentRepository: Repository<Equipment>;
@@ -163,11 +164,16 @@ export class EquipmentService {
         const alerts = await this.getMaintenanceAlerts();
         if (alerts.length > 0) {
           const staffRepo = AppDataSource.getRepository(Staff);
+          const notificationRepo = AppDataSource.getRepository(Notification);
           const admins = await staffRepo.find({ where: { systemRole: '系统管理员', isActive: true } });
           for (const a of alerts) {
             const days = Math.ceil((new Date(a.nextMaintenanceDate!).getTime() - Date.now()) / 86400000);
             for (const admin of admins) {
-              await this.notificationService.sendNotification(admin.id, `设备 ${a.equipmentNumber} 需${days}天内维护`, { type: 'maintenance', link: '/equipment' });
+              const message = `设备 ${a.equipmentNumber} 需${days}天内维护`;
+              const existing = await notificationRepo.findOne({ where: { userId: admin.id, message, isRead: false } });
+              if (!existing) {
+                await this.notificationService.sendNotification(admin.id, message, { type: 'maintenance', link: '/equipment' });
+              }
             }
           }
           console.log(`[Maintenance] ${alerts.length} devices need maintenance, notified admins`);

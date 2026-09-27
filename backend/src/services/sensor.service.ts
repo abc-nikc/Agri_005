@@ -310,7 +310,23 @@ export class SensorService {
 
   /** 将异常写入告警记录表并发送系统通知 */
   private async recordAndNotify(anomalies: any[]): Promise<void> {
+    const { Staff } = await import('../models/staff.entity');
+    const admins = await AppDataSource.getRepository(Staff).find({
+      where: { systemRole: '系统管理员', isActive: true },
+    });
+
     for (const a of anomalies) {
+      // 同一未处理异常只保留一条；刷新监控页面不会重复制造告警和通知。
+      const existing = await this.alertRepo.findOne({
+        where: {
+          deviceId: a.deviceId,
+          sensorType: a.sensorType || undefined,
+          anomalyType: a.anomalyType,
+          resolved: false,
+        },
+      });
+      if (existing) continue;
+
       // 写入告警记录
       await this.alertRepo.save({
         plotId: a.plotId,
@@ -329,9 +345,9 @@ export class SensorService {
       // 发送系统通知
       const type = a.severity === 'critical' ? 'error' : 'warning';
       const msg = `[IoT告警] ${a.message}`;
-      try {
-        await this.notifier.sendNotification('', msg, { type, link: '/iot' });
-      } catch {}
+      for (const admin of admins) {
+        try { await this.notifier.sendNotification(admin.id, msg, { type, link: '/iot' }); } catch {}
+      }
     }
   }
 

@@ -12,6 +12,7 @@ export interface TraceabilityRecord {
   inputsData?: any[];
   inventoryData?: any[];
   salesData?: any[];
+  qualityData?: { status?: string; grade?: string; actualYield?: number; notes?: string; inspectedAt?: string; inspectedBy?: string };
   qrCodeUrl?: string;
   exportedAt?: string;
   exportedBy?: string;

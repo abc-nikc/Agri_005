@@ -6,6 +6,7 @@
         <el-tag v-if="unreadCount > 0" type="danger" effect="dark" size="small">{{ unreadCount }} 条未读</el-tag>
       </div>
       <div class="header-actions">
+        <el-button @click="enableBrowserNotifications" :type="browserEnabled ? 'success' : 'primary'" plain>{{ browserEnabled ? '浏览器通知已启用' : '启用浏览器通知' }}</el-button>
         <el-button @click="markAllRead" :disabled="!notifications.length || unreadCount === 0">全部已读</el-button>
         <el-button @click="loadNotifications" :icon="Refresh">刷新</el-button>
       </div>
@@ -36,9 +37,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { Refresh, Delete } from '@element-plus/icons-vue';
-import { notificationService, type Notification , type NotificationPagination } from '@/services/notification.service';
+import { ElMessage } from 'element-plus';
+import { notificationService, type Notification as AppNotification, type NotificationPagination } from '@/services/notification.service';
 
-const notifications = ref<Notification[]>([]); const unreadCount = ref(0); const loading = ref(false);
+const notifications = ref<AppNotification[]>([]); const unreadCount = ref(0); const loading = ref(false);
+const browserEnabled = ref('Notification' in window && window.Notification.permission === 'granted');
 const page = ref(1); const pagination = ref<NotificationPagination>({ page: 1, limit: 20, total: 0, totalPages: 0 });
 
 onMounted(() => { loadUnreadCount(); loadNotifications(); });
@@ -46,8 +49,9 @@ async function loadNotifications() { loading.value = true; try { const r = await
 async function loadUnreadCount() { try { unreadCount.value = await notificationService.getUnreadCount(); } catch {} }
 function goPage(p: number) { page.value = p; loadNotifications(); }
 async function markAllRead() { try { await notificationService.markAllAsRead(); await loadNotifications(); loadUnreadCount(); } catch {} }
-async function readOne(n: Notification) { if (!n.isRead) { try { await notificationService.markAsRead(n.id); n.isRead = true; loadUnreadCount(); } catch {} } }
+async function readOne(n: AppNotification) { if (!n.isRead) { try { await notificationService.markAsRead(n.id); n.isRead = true; loadUnreadCount(); } catch {} } }
 async function delOne(id: string) { try { await notificationService.delete(id); notifications.value = notifications.value.filter(x => x.id !== id); loadUnreadCount(); } catch {} }
+async function enableBrowserNotifications() { if (!('Notification' in window)) { ElMessage.error('当前浏览器不支持桌面通知'); return; } const permission = await window.Notification.requestPermission(); browserEnabled.value = permission === 'granted'; if (browserEnabled.value) { new window.Notification('农场管家', { body: '浏览器通知已启用，重要预警会实时提醒。' }); ElMessage.success('浏览器通知已启用'); } else { ElMessage.warning('浏览器通知权限未授予'); } }
 function typeIcon(t: string) { const m: Record<string, string> = { warning: '⚠️', error: '❌', success: '✅', info: 'ℹ️', maintenance: '🔧', inventory: '📦', harvest: '🌾' }; return m[t] || '📌'; }
 function fmt(d: string) { return new Date(d).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }); }
 </script>

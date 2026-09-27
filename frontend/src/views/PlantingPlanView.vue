@@ -54,9 +54,11 @@
           <el-table-column label="播种" width="120"><template #default="{row}">{{ row.sowDate }}</template></el-table-column>
           <el-table-column label="预计采收" width="120"><template #default="{row}">{{ row.estimatedHarvestDate }}</template></el-table-column>
           <el-table-column label="状态" width="100"><template #default="{row}"><el-tag :type="row.status==='已完成'?'success':''" size="small" effect="plain">{{ row.status }}</el-tag></template></el-table-column>
-          <el-table-column label="操作" width="220" fixed="right">
+          <el-table-column label="质量检验" width="110"><template #default="{row}"><el-tag :type="row.qualityStatus==='合格'?'success':row.qualityStatus==='不合格'?'danger':'warning'" size="small" effect="plain">{{ row.qualityStatus || '待检' }}{{ row.qualityGrade ? ` · ${row.qualityGrade}` : '' }}</el-tag></template></el-table-column>
+          <el-table-column label="操作" width="300" fixed="right">
             <template #default="{row}">
               <el-button v-if="row.status === '进行中'" type="success" link size="small" @click="finishBatch(row)">完成采收</el-button>
+              <el-button v-if="row.status === '已完成'" type="warning" link size="small" @click="showQualityDialog(row)">质量检验</el-button>
               <el-button v-if="row.status === '已完成'" link size="small" @click="showSplitDialog(row)">按品质拆分</el-button>
               <el-button v-if="row.status !== '已完成'" type="danger" link size="small" @click="delBatch(row.id)">删除</el-button>
             </template>
@@ -79,6 +81,15 @@
         </div>
         <div class="form-actions"><el-button @click="showPlanForm=false">取消</el-button><el-button type="primary" native-type="submit">保存</el-button></div>
       </form>
+    </el-dialog>
+
+    <!-- Quality inspection dialog -->
+    <el-dialog v-model="qualityVisible" title="生产批次质量检验" width="520px">
+      <div class="fg"><label>检验结论*</label><select v-model="qualityForm.passed"><option :value="true">合格</option><option :value="false">不合格</option></select></div>
+      <div class="fg" v-if="qualityForm.passed"><label>品质等级*</label><select v-model="qualityForm.grade"><option value="">请选择</option><option value="特级">特级</option><option value="一级">一级</option><option value="二级">二级</option><option value="三级">三级</option></select></div>
+      <div class="fg"><label>实际产量(kg)</label><input v-model.number="qualityForm.actualYield" type="number" min="0.01" step="0.01" /></div>
+      <div class="fg"><label>检验说明</label><textarea v-model="qualityForm.notes" rows="3" placeholder="记录外观、农残、含水率等检验情况"></textarea></div>
+      <template #footer><el-button @click="qualityVisible=false">取消</el-button><el-button type="primary" @click="submitQuality" :loading="qualityLoading">保存检验结果</el-button></template>
     </el-dialog>
 
     <!-- Batch Form Modal -->
@@ -144,6 +155,10 @@ const splitVisible = computed({ get: () => !!splitBatchId.value, set: (v) => { i
 const splitBatchId = ref('');
 const splitForm = reactive({ grade1:'', qty1:0, grade2:'', qty2:0, grade3:'', qty3:0 });
 const splitLoading = ref(false);
+const qualityVisible = ref(false);
+const qualityBatchId = ref('');
+const qualityLoading = ref(false);
+const qualityForm = reactive({ passed: true, grade: '一级', actualYield: 0, notes: '' });
 
 onMounted(() => { loadRefs(); store.fetchPlans(); store.fetchBatches(); store.fetchTermRecommendations(); });
 const termTimer = setInterval(() => store.fetchTermRecommendations(), 3600000);
@@ -162,6 +177,8 @@ async function finishBatch(b: any) { const date = prompt('请输入实际采收�
 async function delBatch(id: string) { if(!confirm('确定删除?')) return; const batch = store.batches.find((b:any)=>b.id===id); const backup = batch ? { ...batch } : null; try { await store.deleteBatch(id); const addUndo = (window as any).__addUndo; if (addUndo && backup) addUndo(id, '删除批次「' + (backup.batchNumber || '') + '」', async () => { await store.createBatch(backup); }); } catch {} }
 function showSplitDialog(b: any) { splitBatchId.value = b.id; Object.keys(splitForm).forEach(k=>splitForm[k]=''); splitForm.qty1 = 0; splitForm.qty2 = 0; splitForm.qty3 = 0; }
 async function submitSplit() { const grades = []; if (splitForm.grade1) grades.push({ grade: splitForm.grade1, quantity: Number(splitForm.qty1) }); if (splitForm.grade2) grades.push({ grade: splitForm.grade2, quantity: Number(splitForm.qty2) }); if (splitForm.grade3) grades.push({ grade: splitForm.grade3, quantity: Number(splitForm.qty3) }); if (!grades.length) { alert('请至少填写一个等级'); return; } splitLoading.value = true; try { const api = await import('@/services/production-batch.service'); await api.productionBatchService.splitByQuality(splitBatchId.value, grades); splitBatchId.value = ''; store.fetchBatches(); } catch (e: any) { alert('拆分失败: ' + (e.response?.data?.error || e.message)); } finally { splitLoading.value = false; } }
+function showQualityDialog(b: any) { qualityBatchId.value = b.id; qualityForm.passed = b.qualityStatus !== '不合格'; qualityForm.grade = b.qualityGrade || '一级'; qualityForm.actualYield = Number(b.actualYield || 0); qualityForm.notes = b.inspectionNotes || ''; qualityVisible.value = true; }
+async function submitQuality() { if (qualityForm.passed && !qualityForm.grade) { alert('请选择品质等级'); return; } qualityLoading.value = true; try { const api = await import('@/services/production-batch.service'); await api.productionBatchService.inspectQuality(qualityBatchId.value, { passed: qualityForm.passed, grade: qualityForm.passed ? qualityForm.grade : undefined, actualYield: qualityForm.actualYield || undefined, notes: qualityForm.notes || undefined }); qualityVisible.value = false; await store.fetchBatches(); } catch (e: any) { alert('保存失败: ' + (e.response?.data?.error || e.message)); } finally { qualityLoading.value = false; } }
 function planTagType(s: string) { const m:Record<string,string>={'待执行':'info','执行中':'','已完成':'success','已调整':'warning'}; return m[s]||''; }
 
 // ===== AI 种植推荐 =====

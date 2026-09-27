@@ -18,6 +18,7 @@ import BaseMapView from '../views/BaseMapView.vue';
 import FarmTaskView from '../views/FarmTaskView.vue';
 import NewsView from '../views/NewsView.vue';
 import SystemSettingsView from '../views/SystemSettingsView.vue';
+import PublicTraceView from '../views/PublicTraceView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -30,6 +31,11 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: LoginView,
+    },
+    {
+      path: '/trace/:code',
+      name: 'PublicTrace',
+      component: PublicTraceView,
     },
     {
       path: '/dashboard',
