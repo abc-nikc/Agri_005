@@ -1,25 +1,26 @@
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库
-  postgres:
-    image: postgres:15-alpine
-    container_name: farm-postgres
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: farm-mysql
     restart: unless-stopped
     environment:
-      POSTGRES_USER: farm_user
-      POSTGRES_PASSWORD: farm_password
-      POSTGRES_DB: farm_management
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: farm_management
+      MYSQL_USER: farm_user
+      MYSQL_PASSWORD: farm_password
       TZ: Asia/Shanghai
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+      - ../scripts/setup-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - farm-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U farm_user -d farm_management"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -113,7 +114,7 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  mysql_data:
   influxdb_data:
   influxdb_config:
   emqx_data:

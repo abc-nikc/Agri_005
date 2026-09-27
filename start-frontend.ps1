@@ -75,7 +75,7 @@ Write-Host "   正在启动前端服务器..." -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "前端服务器将在 http://localhost:5173 启动" -ForegroundColor Cyan
-Write-Host "请确保后端服务器已在 http://localhost:3000 运行" -ForegroundColor Cyan
+Write-Host "请确保后端服务器已在 http://localhost:3001 运行" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "按 Ctrl+C 停止服务器" -ForegroundColor Yellow
 Write-Host ""

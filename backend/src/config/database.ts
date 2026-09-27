@@ -20,8 +20,6 @@ import { SensorData } from '../models/sensor-data.entity';
 import { AlertRecord } from '../models/alert-record.entity';
 import { SystemSettings } from '../models/system-settings.entity';
 import { FarmTask } from '../models/farm-task.entity';
-import * as path from 'path';
-
 config();
 
 export const AppDataSource = new DataSource({
@@ -31,8 +29,10 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'root123',
   database: process.env.DB_NAME || 'farm_management',
-  synchronize: true,
-  logging: false,
+  charset: 'utf8mb4',
+  timezone: '+08:00',
+  synchronize: process.env.DB_SYNCHRONIZE !== 'false',
+  logging: process.env.DB_LOGGING === 'true',
   entities: [
     AuditLog,
     BaseEntity,
@@ -57,4 +57,7 @@ export const AppDataSource = new DataSource({
   ],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   subscribers: [__dirname + '/../subscribers/*{.ts,.js}'],
+  extra: {
+    connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
+  },
 });

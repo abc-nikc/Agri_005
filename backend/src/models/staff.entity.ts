@@ -8,7 +8,6 @@ export class Staff extends BaseEntity {
   name!: string;
 
   @Column({ name: 'username', length: 50, unique: true })
-  @Index()
   username!: string;
 
   @Column({ name: 'password_hash', length: 255 })

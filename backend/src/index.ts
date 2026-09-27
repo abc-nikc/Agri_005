@@ -28,7 +28,9 @@ const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
       'http://localhost:5173',
+      'http://127.0.0.1:5173',
       'http://localhost:3000',
+      'http://127.0.0.1:3000',
     ];
     
     // 允许不带 origin 的请求（如移动应用、Postman）
@@ -192,63 +194,7 @@ const startServer = async () => {
   try {
     // 初始化数据库连接
     await AppDataSource.initialize();
-    console.log('[INFO] Connected to SQLite database');
-
-    // 自动补齐缺失的数据库列（兼容旧表结构）
-    try {
-      const { default: Database } = await import('better-sqlite3');
-      const dbPath = require('path').join(__dirname, '..', 'farm_management.sqlite');
-      const db = new Database(dbPath);
-      type Col = { name: string };
-      const fixCol = (table: string, col: string, type: string) => {
-        try { db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`); console.log(`[DB] Added column ${table}.${col}`); } catch {}
-      };
-      const cols = (table: string) => (db.pragma(`table_info(${table})`) as Col[]).map(c => c.name);
-      const stCols = cols('stock_transactions');
-      if (!stCols.includes('sub_type')) fixCol('stock_transactions', 'sub_type', 'TEXT');
-      if (!stCols.includes('approver')) fixCol('stock_transactions', 'approver', 'TEXT');
-      if (!stCols.includes('source_or_dest')) fixCol('stock_transactions', 'source_or_dest', 'TEXT');
-      if (!stCols.includes('batch_number')) fixCol('stock_transactions', 'batch_number', 'TEXT');
-      if (!stCols.includes('remark')) fixCol('stock_transactions', 'remark', 'TEXT');
-      const coCols = cols('cost_records');
-      if (!coCols.includes('remark')) fixCol('cost_records', 'remark', 'TEXT');
-      // 自动创建 farm_tasks 表
-      if (!cols('farm_tasks').length) {
-        db.exec(`CREATE TABLE farm_tasks (
-          id TEXT PRIMARY KEY,
-          title TEXT NOT NULL,
-          description TEXT,
-          category TEXT NOT NULL,
-          priority TEXT DEFAULT 'medium',
-          status TEXT DEFAULT '待执行',
-          plot_id TEXT,
-          plot_name TEXT,
-          variety_id TEXT,
-          variety_name TEXT,
-          batch_id TEXT,
-          assignee_id TEXT,
-          assignee_name TEXT,
-          scheduled_date DATETIME,
-          completed_date DATETIME,
-          estimated_duration INTEGER,
-          actual_duration INTEGER,
-          created_by TEXT,
-          ai_generated INTEGER DEFAULT 0,
-          ai_reason TEXT,
-          remark TEXT,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )`);
-        db.exec(`CREATE INDEX idx_farm_tasks_status ON farm_tasks(status)`);
-        db.exec(`CREATE INDEX idx_farm_tasks_priority ON farm_tasks(priority)`);
-        db.exec(`CREATE INDEX idx_farm_tasks_category ON farm_tasks(category)`);
-        db.exec(`CREATE INDEX idx_farm_tasks_assignee ON farm_tasks(assignee_id)`);
-        db.exec(`CREATE INDEX idx_farm_tasks_plot ON farm_tasks(plot_id)`);
-        db.exec(`CREATE INDEX idx_farm_tasks_scheduled ON farm_tasks(scheduled_date)`);
-        console.log('[DB] Created farm_tasks table');
-      }
-      db.close();
-    } catch (e: any) { console.log('[WARN] Schema migration skipped:', e.message); }
+    console.log('[INFO] Connected to MySQL database');
 
     // 自动创建 admin 用户（如果不存在）
     const { Staff } = await import('./models/staff.entity');

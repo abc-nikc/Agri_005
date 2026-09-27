@@ -59,7 +59,7 @@ erDiagram
 | id | UUID | PK | 唯一标识 |
 | name | VARCHAR(100) | UNIQUE, NOT NULL | 品种名称 |
 | category | VARCHAR(50) | NOT NULL | 类别（如"茄果类"） |
-| sowing_season | JSONB | | 播种季节配置（如["春季","秋季"]） |
+| sowing_season | JSON | | 播种季节配置（如["春季","秋季"]） |
 | planting_density | INTEGER | | 种植密度（株/亩） |
 | fertilization_rate | DECIMAL(10,2) | | 施肥量（kg/亩） |
 | watering_frequency | INTEGER | | 浇水频率（天/次） |
@@ -210,14 +210,14 @@ erDiagram
 | operator_id | UUID | FK → staff.id, NOT NULL | 操作人 |
 | operation_date | DATE | NOT NULL | 操作日期 |
 | operation_time | TIME | NOT NULL | 操作时间 |
-| details | JSONB | NOT NULL | 操作详情（根据类型变化） |
+| details | JSON | NOT NULL | 操作详情（根据类型变化） |
 | weather_condition | VARCHAR(100) | | 当时天气状况 |
 | is_supplemental | BOOLEAN | DEFAULT false | 是否补录 |
 | supplemental_timestamp | TIMESTAMP | | 补录时间 |
 | created_at | TIMESTAMP | NOT NULL | 创建时间 |
 | updated_at | TIMESTAMP | NOT NULL | 更新时间 |
 
-**Operation Details Schema** (JSONB field `details`):
+**Operation Details Schema** (JSON field `details`):
 
 - **播种/移栽**:
   ```json
@@ -402,11 +402,11 @@ erDiagram
 | batch_id | UUID | FK → production_batches.id, NOT NULL | 关联生产批次 |
 | traceability_code | VARCHAR(100) | UNIQUE, NOT NULL | 追溯码 |
 | seed_source | TEXT | | 种子来源 |
-| farming_operations_summary | JSONB | | 农事操作汇总 |
-| input_usage_summary | JSONB | | 投入品使用汇总 |
-| environment_data_summary | JSONB | | 环境监控数据汇总 |
-| harvest_info | JSONB | | 采收信息 |
-| sales_info | JSONB | | 销售信息 |
+| farming_operations_summary | JSON | | 农事操作汇总 |
+| input_usage_summary | JSON | | 投入品使用汇总 |
+| environment_data_summary | JSON | | 环境监控数据汇总 |
+| harvest_info | JSON | | 采收信息 |
+| sales_info | JSON | | 销售信息 |
 | is_deleted | BOOLEAN | DEFAULT false | 是否删除（逻辑删除标记，实际不可删除） |
 | created_at | TIMESTAMP | NOT NULL | 创建时间 |
 | updated_at | TIMESTAMP | NOT NULL | 更新时间 |
@@ -535,11 +535,11 @@ END
 | user_id | UUID | FK → staff.id | 操作者ID |
 | user_ip | INET | | 操作者IP地址 |
 | action_type | VARCHAR(100) | NOT NULL | 操作类型 |
-| action_params | JSONB | | 操作参数 |
+| action_params | JSON | | 操作参数 |
 | target_entity | VARCHAR(100) | | 目标实体 |
 | target_id | UUID | | 目标实体ID |
-| before_state | JSONB | | 操作前状态 |
-| after_state | JSONB | | 操作后状态 |
+| before_state | JSON | | 操作前状态 |
+| after_state | JSON | | 操作后状态 |
 | result | ENUM | NOT NULL | 结果：成功/失败/异常 |
 | error_message | TEXT | | 错误信息 |
 | created_at | TIMESTAMP | NOT NULL | 操作时间（毫秒精度） |

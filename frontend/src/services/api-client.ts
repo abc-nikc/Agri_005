@@ -4,6 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -26,20 +27,21 @@ apiClient.interceptors.response.use(
     }
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-          const { accessToken } = response.data;
-          localStorage.setItem('access_token', accessToken);
-          error.config.headers.Authorization = `Bearer ${accessToken}`;
-          return apiClient(error.config);
-        } catch {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
-          return Promise.reject(new Error('登录已过期'));
-        }
+      try {
+        const response = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
+        const { accessToken } = response.data;
+        localStorage.setItem('access_token', accessToken);
+        error.config.headers.Authorization = `Bearer ${accessToken}`;
+        return apiClient(error.config);
+      } catch {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(new Error('登录已过期'));
       }
     }
     return Promise.reject(error);

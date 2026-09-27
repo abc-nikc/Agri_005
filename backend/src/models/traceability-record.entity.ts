@@ -4,7 +4,6 @@ import { BaseEntity } from './base.entity';
 @Entity('traceability_records')
 export class TraceabilityRecord extends BaseEntity {
   @Column({ name: 'trace_code', length: 50, unique: true })
-  @Index()
   traceCode!: string;
 
   @Column({ name: 'batch_id', length: 36 })

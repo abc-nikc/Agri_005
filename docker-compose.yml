@@ -16,8 +16,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: farm_management
-      MYSQL_CHARSET: utf8mb4
-      MYSQL_COLLATION: utf8mb4_unicode_ci
+      MYSQL_USER: farm_user
+      MYSQL_PASSWORD: farm_password
+      TZ: Asia/Shanghai
     ports:
       - "3306:3306"
     volumes:
@@ -26,7 +27,7 @@ services:
     networks:
       - farm-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -100,9 +101,10 @@ services:
       PORT: 3000
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: root123
+      DB_USER: farm_user
+      DB_PASSWORD: farm_password
       DB_NAME: farm_management
+      DB_SYNCHRONIZE: "true"
       INFLUX_URL: http://influxdb:8086
       INFLUX_TOKEN: farm-management-token-2024
       INFLUX_ORG: farm-org
@@ -135,7 +137,7 @@ services:
     container_name: farm-frontend
     restart: unless-stopped
     environment:
-      VITE_API_BASE_URL: http://localhost:3001/api
+      VITE_API_BASE_URL: http://localhost:3001/api/v1
     ports:
       - "5173:5173"
     depends_on:

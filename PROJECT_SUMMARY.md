@@ -9,7 +9,7 @@
 **后端:**
 - Node.js + TypeScript
 - Express.js (Web 框架)
-- PostgreSQL + TypeORM (关系型数据库)
+- MySQL 8.0 + TypeORM (关系型数据库)
 - InfluxDB (时序数据库，用于物联网数据)
 - MQTT (物联网设备通信)
 - Redis (缓存)
@@ -34,7 +34,7 @@
 - ✅ 环境变量配置
 
 ### Phase 2: 基础架构
-- ✅ 数据库配置 (PostgreSQL + TypeORM)
+- ✅ 数据库配置 (MySQL + TypeORM)
 - ✅ InfluxDB 配置
 - ✅ JWT 认证中间件
 - ✅ RBAC 授权中间件
@@ -291,7 +291,7 @@ nyjc/
    - 修改数据库连接等配置
 
 3. **启动数据库**
-   - 确保 PostgreSQL 正在运行
+   - 确保 MySQL 正在运行
    - 创建数据库 `farm_management`
 
 4. **运行数据库迁移**
@@ -412,7 +412,7 @@ nyjc/
 ## 注意事项
 
 1. **Node.js 安装**: 本项目需要 Node.js v18 或更高版本
-2. **数据库配置**: 需要正确配置 PostgreSQL 连接
+2. **数据库配置**: 需要正确配置 MySQL 连接
 3. **环境变量**: 请确保在运行前创建了 `.env` 文件
 4. **种子数据**: 运行 `npm run seed` 可插入测试数据
 5. **Docker**: 如果不想本地安装数据库，可使用 Docker Compose

@@ -3,21 +3,30 @@
 
 Write-Host "=== 农场管家系统 - 启动 ===" -ForegroundColor Green
 
-# 确保 PostgreSQL 运行
-Write-Host "[1/3] 启动 PostgreSQL..." -ForegroundColor Cyan
-net start postgresql-x64-15 2>$null
-Write-Host "PostgreSQL OK" -ForegroundColor Green
+# 确保 MySQL 运行
+Write-Host "[1/3] 检查 MySQL..." -ForegroundColor Cyan
+$mysqlService = Get-Service -ErrorAction SilentlyContinue | Where-Object {
+    $_.Name -match 'mysql' -or $_.DisplayName -match 'mysql'
+} | Select-Object -First 1
+if ($mysqlService) {
+    if ($mysqlService.Status -ne 'Running') {
+        Start-Service -Name $mysqlService.Name
+    }
+    Write-Host "MySQL OK ($($mysqlService.Name))" -ForegroundColor Green
+} elseif (-not (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue)) {
+    Write-Host "未检测到 MySQL。请安装 MySQL 8.0，或使用 'docker compose up -d --build' 启动完整环境。" -ForegroundColor Red
+    exit 1
+}
 
 # 启动后端
 Write-Host "[2/3] 启动后端 (端口 3001)..." -ForegroundColor Cyan
-$env:PATH += ";D:\Node"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\backend'; `$env:PATH += ';D:\Node'; npm run dev" -WindowStyle Minimized
+Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location '$PWD\backend'; npm run dev" -WindowStyle Hidden
 Start-Sleep -Seconds 8
 Write-Host "后端 OK (http://localhost:3001)" -ForegroundColor Green
 
 # 启动前端
 Write-Host "[3/3] 启动前端 (端口 5173)..." -ForegroundColor Cyan
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\frontend'; `$env:PATH += ';D:\Node'; .\node_modules\.bin\vite.cmd --port 5173" -WindowStyle Minimized
+Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location '$PWD\frontend'; npm run dev" -WindowStyle Hidden
 Start-Sleep -Seconds 3
 Write-Host "前端 OK (http://localhost:5173)" -ForegroundColor Green
 

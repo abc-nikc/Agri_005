@@ -38,7 +38,7 @@ docker-compose up -d
 ```
 
 这将启动以下服务:
-- PostgreSQL (端口 5432)
+- MySQL 8.0 (端口 3306)
 - InfluxDB (端口 8086)
 - Redis (端口 6379)
 - MQTT Broker (端口 1883)
@@ -67,12 +67,10 @@ docker-compose logs -f frontend
 
 - **前端应用**: http://localhost:5173
 - **后端 API**: http://localhost:3000/api/v1
-- **数据库管理 (Adminer)**: http://localhost:8080
-  - 系统: PostgreSQL
-  - 服务器: postgres
-  - 用户名: postgres
-  - 密码: password
-  - 数据库: farm_management
+- **MySQL**: `localhost:3306`
+  - 用户名: `farm_user`
+  - 密码: `farm_password`
+  - 数据库: `farm_management`
 
 ### 7. 停止服务
 
@@ -126,13 +124,13 @@ docker-compose restart frontend
 ### 问题 2: 数据库连接失败
 
 **解决方法**:
-1. 检查 PostgreSQL 容器是否正在运行:
+1. 检查 MySQL 容器是否正在运行:
    ```bash
-   docker-compose ps postgres
+   docker compose ps mysql
    ```
-2. 查看 PostgreSQL 日志:
+2. 查看 MySQL 日志:
    ```bash
-   docker-compose logs postgres
+   docker compose logs mysql
    ```
 
 ### 问题 3: 前端无法连接后端
@@ -174,13 +172,13 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ### 备份数据库
 
 ```bash
-docker-compose exec postgres pg_dump -U postgres farm_management > backup.sql
+docker compose exec -T mysql mysqldump -u farm_user -pfarm_password farm_management > backup.sql
 ```
 
 ### 恢复数据库
 
 ```bash
-docker-compose exec -T postgres psql -U postgres farm_management < backup.sql
+Get-Content backup.sql | docker compose exec -T mysql mysql -u farm_user -pfarm_password farm_management
 ```
 
 ## 清理

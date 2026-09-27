@@ -26,10 +26,10 @@ export const comparePassword = async (
 
 /**
  * 验证密码强度
- * 要求：最小6位
+ * 要求：至少8位，且同时包含字母和数字
  * @param password 密码
  * @returns 是否有效
  */
 export const validatePasswordStrength = (password: string): boolean => {
-  return password.length >= 6;
+  return password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password);
 };

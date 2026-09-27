@@ -176,7 +176,6 @@ const handleLogin = async () => {
     errorMessage.value = '';
     const result = await login(username.value, password.value);
     localStorage.setItem('access_token', result.accessToken);
-    localStorage.setItem('refresh_token', result.refreshToken);
     localStorage.setItem('user', JSON.stringify(result.user));
     router.push('/dashboard');
   } catch (error: any) {

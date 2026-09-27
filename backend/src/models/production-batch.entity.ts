@@ -4,7 +4,6 @@ import { BaseEntity } from './base.entity';
 @Entity('production_batches')
 export class ProductionBatch extends BaseEntity {
   @Column({ name: 'batch_number', length: 100, unique: true })
-  @Index()
   batchNumber!: string;
 
   @Column({ name: 'plot_id', length: 36 })
