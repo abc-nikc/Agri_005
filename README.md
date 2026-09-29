@@ -348,16 +348,3 @@ npm test -- --runInBand
 cd frontend
 npm run build
 ```
-
-当前基线：后端与前端构建通过，Jest 自动化测试 **34/34** 通过。
-
-## 说明
-
-- 本项目为智慧农业方向的团队实训项目。
-- 邮件、企业微信、MQTT 和在线大模型调用需要部署方提供真实服务凭据。
-- 仓库不保存 `.env`、API Key、数据库密码等敏感信息。
-- 对外部署时应关闭 `DB_SYNCHRONIZE`，改用受控迁移流程，并替换所有默认账号与密钥。
-
----
-
-如果这个项目对你有帮助，欢迎通过 [Issues](https://github.com/abc-nikc/Agri_005/issues) 提交建议。
