@@ -21,7 +21,8 @@ function fmtDate(d: any): string {
 
 // ====== 配置 ======
 const AI_BASE_URL = process.env.AI_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-const AI_API_KEY = process.env.AI_API_KEY || '';
+// AI_API_KEY 为统一配置名；兼容早期部署中使用的 ZHIPU_API_KEY。
+const AI_API_KEY = process.env.AI_API_KEY || process.env.ZHIPU_API_KEY || '';
 const AI_MODEL = process.env.AI_MODEL || 'glm-4-flash';
 
 function isAIConfigured(): boolean {
@@ -42,7 +43,6 @@ function callAIHttp(messages: { role: string; content: string }[], temperature =
         'Authorization': `Bearer ${AI_API_KEY}`,
         'Content-Length': Buffer.byteLength(postData),
       },
-      rejectUnauthorized: false,
     };
     const transport = url.protocol === 'http:' ? http : https;
     const req = transport.request(options, (res: any) => {
